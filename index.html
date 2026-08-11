@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HostReceipts — WhatsApp Tax Logger (Demo)</title>
+<style>
+  :root{--wa:#075e54;--wa2:#128c7e;--wa3:#25d366;--bg:#e5ddd5;--bubble:#fff;--bubble2:#dcf8c6;--ink:#1a1f2e;--muted:#6b7280;--accent:#f59e0b;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f3f4f6;color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+  .topbar{background:var(--wa);color:#fff;width:100%;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar .logo{font-weight:800;} .topbar .logo span{opacity:.8;font-weight:500;}
+  .topbar .live{font-size:11px;background:var(--wa3);color:#054d33;font-weight:700;padding:3px 10px;border-radius:999px;}
+  .phone{width:100%;max-width:430px;margin:20px auto 10px;background:var(--bg);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.15);overflow:hidden;border:1px solid #d1c7bd;}
+  .ph-head{background:var(--wa2);color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+  .avatar{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .ph-head .name{font-weight:700;font-size:15px;}
+  .ph-head .status{font-size:11px;opacity:.85;}
+  .tabs{display:flex;background:var(--wa2);}
+  .tab{flex:1;text-align:center;padding:10px;color:#d9f4ef;font-weight:700;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;}
+  .tab.active{color:#fff;border-bottom-color:var(--wa3);}
+  .chat{padding:14px 12px;min-height:520px;max-height:560px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;}
+  .msg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:14px;line-height:1.45;position:relative;box-shadow:0 1px 1px rgba(0,0,0,.08);}
+  .msg.bot{background:var(--bubble);align-self:flex-start;border-top-left-radius:3px;}
+  .msg.user{background:var(--bubble2);align-self:flex-end;border-top-right-radius:3px;}
+  .msg .time{display:block;font-size:10px;color:#a0a0a0;text-align:right;margin-top:4px;}
+  .chip{display:inline-block;background:var(--wa2);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;margin:6px 6px 0 0;border:none;}
+  .chip:hover{background:var(--wa);}
+  .typing{display:inline-flex;gap:4px;padding:12px 14px;}
+  .typing span{width:7px;height:7px;background:#b0b0b0;border-radius:50%;animation:blink 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+  .parse-card{background:#fdf9ef;border:1px solid #f0e2c0;border-radius:12px;padding:12px;margin-top:8px;}
+  .parse-card h4{font-size:13px;color:#7c5e10;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+  .conf{font-size:11px;background:var(--wa3);color:#054d33;border-radius:999px;padding:2px 8px;font-weight:700;}
+  .parse-card .kv{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px dashed #eee;}
+  .parse-card .kv:last-of-type{border-bottom:none;}
+  .parse-card .kv b{font-weight:700;}
+  .flag{display:inline-block;background:var(--accent);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;margin-top:8px;}
+  .confirm-row{display:flex;gap:8px;margin-top:10px;}
+  .btn{flex:1;border:none;border-radius:9px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;}
+  .btn.ok{background:var(--wa3);color:#054d33;} .btn.ok:hover{background:#1fbd5d;color:#fff;}
+  .btn.edit{background:#fff;color:var(--ink);border:1px solid #ddd;}
+  .edit-form{background:#fff;border:1px solid #ddd;border-radius:12px;padding:10px;margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+  .edit-form input,.edit-form select{padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;width:100%;}
+  .summary{padding:14px 12px;display:none;}
+  .s-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .s-card h3{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:8px;}
+  .total{font-size:30px;font-weight:900;color:var(--wa);}
+  .cat{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;border-bottom:1px solid #f3f3f3;}
+  .cat:last-child{border-bottom:none;}
+  .cat .amt{font-weight:700;font-variant-numeric:tabular-nums;}
+  .export-btn{width:100%;background:var(--wa);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;margin-top:6px;}
+  .export-btn:hover{background:var(--wa2);}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .modal-inner{background:#fff;border-radius:16px;padding:22px;max-width:380px;width:100%;text-align:center;}
+  .modal-inner h3{font-size:18px;margin-bottom:6px;}
+  .modal-inner p{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
+  .plan{border:2px solid #eee;border-radius:12px;padding:14px;margin-bottom:10px;text-align:left;cursor:pointer;}
+  .plan:hover,.plan.hot{border-color:var(--wa);}
+  .plan .p-name{font-weight:800;font-size:14px;display:flex;justify-content:space-between;}
+  .plan .p-price{color:var(--wa);font-weight:900;}
+  .plan .p-desc{font-size:12px;color:var(--muted);margin-top:3px;}
+  .modal .btn{width:100%;padding:12px;font-size:14px;}
+  .foot{max-width:430px;width:100%;padding:0 16px 30px;font-size:11px;color:var(--muted);text-align:center;line-height:1.6;}
+  .foot a{color:var(--wa);font-weight:700;text-decoration:none;}
+  .attach{position:sticky;bottom:0;background:var(--bg);padding:10px 12px;display:flex;gap:8px;align-items:center;}
+  .attach input[type=file]{display:none;}
+  .attach label{background:#fff;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;border:1px solid #ddd;}
+  .attach .fake-input{flex:1;background:#fff;border-radius:999px;padding:10px 14px;font-size:13px;color:#a0a0a0;border:1px solid #ddd;}
+  .empty-note{font-size:12px;color:var(--muted);text-align:center;padding:20px;}
+  .gdpr{font-size:10px;color:var(--muted);text-align:center;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">🧾 HostReceipts <span>· WhatsApp tax logger</span></div>
+  <div class="live">● click dummy</div>
+</div>
+
+<div class="phone">
+  <div class="ph-head">
+    <div class="avatar">🧾</div>
+    <div>
+      <div class="name">HostReceipts Bot</div>
+      <div class="status">online · WhatsApp Business</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tabChat" onclick="showTab('chat')">💬 Chat</div>
+    <div class="tab" id="tabSum" onclick="showTab('summary')">📊 Summary</div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat" id="chat"></div>
+  <div class="attach">
+    <label for="fileInput" title="Send a receipt photo">📎</label>
+    <input type="file" id="fileInput" accept="image/*" onchange="sendUploaded(this)">
+    <div class="fake-input">Message… (tap a sample receipt or 📎)</div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary" id="summary">
+    <div class="s-card">
+      <h3>Tax year 2026 · all properties</h3>
+      <div class="total" id="sumTotal">€0.00</div>
+      <div style="font-size:12px;color:var(--muted)">total deductible expenses logged</div>
+    </div>
+    <div class="s-card">
+      <h3>By category</h3>
+      <div id="sumCats"></div>
+    </div>
+    <div class="s-card">
+      <h3>By property</h3>
+      <div id="sumProps"></div>
+    </div>
+    <button class="export-btn" onclick="openExport()">📤 Export tax-ready summary</button>
+    <div class="gdpr">GDPR: receipts stored encrypted in the EU · raw images auto-deleted after 90 days</div>
+  </div>
+</div>
+
+<div class="foot">
+  Click dummy — nothing is parsed or charged. Flow: photo in → AI parses → one-tap confirm → tax-ready deduction.
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-inner">
+    <h3>📤 Tax-ready export</h3>
+    <p>Accountant-ready summary of every logged deduction. Raw receipts stay encrypted in the EU.</p>
+    <div class="plan hot" onclick="selectPlan('sub')">
+      <div class="p-name"><span>Auto-log all year</span><span class="p-price">€79/yr</span></div>
+      <div class="p-desc">per property · unlimited logging · monthly digests · exports included</div>
+    </div>
+    <div class="plan" onclick="selectPlan('pass')">
+      <div class="p-name"><span>One-time export</span><span class="p-price">€29</span></div>
+      <div class="p-desc">this tax season only · PDF + CSV summary</div>
+    </div>
+    <button class="btn ok" id="modalBtn" onclick="doExport()">Subscribe €79/yr</button>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted)">Demo only — no payment is taken.</div>
+  </div>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const entries = [];  // {vendor, amount, date, category, property, confidence, flagged}
+let lastConfirmed = null;
+let plan = 'sub';
+
+const CAT_COLORS = {'Utilities ⚡':'#0f766e','Repairs 🔧':'#b45309','Cleaning 🧹':'#7c3aed','Supplies 🧻':'#2563eb','Fees 📄':'#dc2626'};
+
+const SAMPLES = [
+  {name:'Electricity bill', file:'IMG_2841.jpg', vendor:'Wien Energie', amount:214.60, category:'Utilities ⚡', property:'Apartment 12 · Wien', flagged:'Summer AC spike 🔎', confidence:96},
+  {name:'Contractor repair', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, category:'Repairs 🔧', property:'Apartment 12 · Wien', flagged:'', confidence:91},
+  {name:'Cleaning service', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, category:'Cleaning 🧹', property:'Studio 4 · Graz', flagged:'', confidence:98},
+];
+
+function bubble(cls, html){ 
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.innerHTML = html + '<span class="time">14:0' + Math.floor(Math.random()*9) + '</span>';
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+function typingBubble(){
+  const d = document.createElement('div');
+  d.className = 'msg bot typing';
+  d.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
+  return d;
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function init(){
+  bubble('bot','👋 Hi! I\'m your HostReceipts bot. Snap any receipt or utility bill and I\'ll log it as a <b>tax-ready deduction</b> for your property. Try me!');
+  bubble('bot','Tap a sample receipt to send it — or use 📎 with a real photo (parsing is simulated in this dummy):');
+  const row = document.createElement('div');
+  SAMPLES.forEach((s,i)=> { const c = document.createElement('button'); c.className='chip'; c.textContent=s.name; c.onclick=()=>sendSample(i); row.appendChild(c); });
+  chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
+}
+
+async function sendSample(i){
+  const s = SAMPLES[i];
+  bubble('user','📷 Sending receipt… <b>'+s.file+'</b>');
+  const t = typingBubble();
+  await sleep(900); t.remove();
+  await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, s.file);
+}
+
+async function sendUploaded(input){
+  const f = input.files[0]; if(!f) return;
+  bubble('user','📷 Sending receipt… <b>'+f.name+'</b>');
+  const t = typingBubble();
+  await sleep(1200); t.remove();
+  // simulated parse — deterministic pick from samples
+  const s = SAMPLES[Math.floor(Math.random()*SAMPLES.length)];
+  await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, f.name);
+  input.value = '';
+}
+
+async function parseCard(vendor, amount, category, property, flagged, confidence, file){
+  bubble('bot','Parsing… one sec 🔎');
+  await sleep(700);
+  const card = bubble('bot','<div class="parse-card" id="parseCard"><h4>Parsed · '+file+' <span class="conf">'+confidence+'% confidence</span></h4>'+
+    '<div class="kv"><span>Vendor</span><b>'+vendor+'</b></div>'+
+    '<div class="kv"><span>Amount</span><b>€'+amount.toFixed(2)+'</b></div>'+
+    '<div class="kv"><span>Date</span><b>01 Aug 2026</b></div>'+
+    '<div class="kv"><span>Category</span><b>'+category+'</b></div>'+
+    '<div class="kv"><span>Property</span><b>'+property+'</b></div>'+
+    (flagged?'<div class="flag">'+flagged+'</div>':'')+
+    '<div class="confirm-row"><button class="btn ok" onclick="confirmLog()">✅ Confirm</button><button class="btn edit" onclick="editCard()">✏️ Correct</button></div></div>');
+  lastConfirmed = {vendor, amount, category, property, flagged, confidence, el: card};
+}
+
+function editCard(){
+  const p = lastConfirmed.el.querySelector('.parse-card');
+  p.querySelector('.confirm-row').remove();
+  const f = document.createElement('div');
+  f.className = 'edit-form';
+  f.innerHTML = '<input id="edAmt" type="number" step="0.01" value="'+lastConfirmed.amount+'"><select id="edCat">'+
+    ['Utilities ⚡','Repairs 🔧','Cleaning 🧹','Supplies 🧻','Fees 📄'].map(c=>'<option'+(c===lastConfirmed.category?' selected':'')+'>'+c+'</option>').join('')+
+    '</select><button class="btn ok" onclick="saveEdit()">✅ Save & log</button>';
+  p.appendChild(f);
+}
+
+function saveEdit(){
+  lastConfirmed.amount = parseFloat(document.getElementById('edAmt').value)||0;
+  lastConfirmed.category = document.getElementById('edCat').value;
+  logEntry();
+}
+
+function confirmLog(){ logEntry(); }
+
+function logEntry(){
+  const e = lastConfirmed; if(!e) return;
+  entries.push({vendor:e.vendor, amount:e.amount, category:e.category, property:e.property, flagged:e.flagged});
+  e.el.remove(); lastConfirmed = null;
+  bubble('bot','✅ <b>Logged!</b> €'+e.amount.toFixed(2)+' · '+e.category+' · '+e.property.replace(' · Wien','').replace(' · Graz',''));
+  const month = entries.reduce((s,x)=>s+x.amount,0);
+  bubble('bot','This month: <b>€'+month.toFixed(2)+'</b> in deductible expenses across your properties. 💰 <button class="chip" onclick="showTab(\'summary\')">View monthly summary</button>');
+  renderSummary();
+}
+
+function renderSummary(){
+  const fmt = n => '€' + n.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2});
+  const total = entries.reduce((s,x)=>s+x.amount,0);
+  document.getElementById('sumTotal').textContent = fmt(total);
+  const cats = {};
+  entries.forEach(e => cats[e.category] = (cats[e.category]||0) + e.amount);
+  document.getElementById('sumCats').innerHTML = Object.entries(cats).map(([k,v])=>
+    '<div class="cat"><span>'+k+'</span><span class="amt">'+fmt(v)+'</span></div>').join('') ||
+    '<div class="empty-note">No deductions logged yet — go to Chat 📸</div>';
+  const props = {};
+  entries.forEach(e => { const p = e.property.split(' · ')[0]; props[p] = (props[p]||0) + e.amount; });
+  document.getElementById('sumProps').innerHTML = Object.entries(props).map(([k,v])=>
+    '<div class="cat"><span>🏠 '+k+'</span><span class="amt">'+fmt(v)+'</span></div>').join('') ||
+    '<div class="empty-note">—</div>';
+}
+
+function showTab(t){
+  document.getElementById('tabChat').classList.toggle('active', t==='chat');
+  document.getElementById('tabSum').classList.toggle('active', t==='summary');
+  document.getElementById('chat').style.display = t==='chat' ? 'flex' : 'none';
+  document.querySelector('.attach').style.display = t==='chat' ? 'flex' : 'none';
+  document.getElementById('summary').style.display = t==='summary' ? 'block' : 'none';
+  renderSummary();
+}
+
+function openExport(){ document.getElementById('modal').style.display='flex'; }
+function selectPlan(p){ plan=p; document.getElementById('modalBtn').textContent = p==='sub' ? 'Subscribe €79/yr' : 'Pay €29 one-time'; }
+function doExport(){
+  document.getElementById('modal').style.display='none';
+  // actually generate a CSV — works offline
+  const rows = [['Vendor','Amount','Category','Property','Date','Status']];
+  entries.forEach(e=>rows.push([e.vendor, e.amount.toFixed(2), e.category, e.property, '2026-08-01', 'confirmed']));
+  const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'hostreceipts-tax-2026.csv';
+  a.click();
+  bubble('bot','📤 <b>Export ready!</b> Tax-year summary attached (CSV) — accountant-ready. '+(plan==='sub'?'🔒 Subscribed €79/yr: auto-logging + monthly digests active.':'🔒 €29 export pass activated.'));
+  showTab('chat');
+}
+
+init();
+</script>
+</body>
+</html>
