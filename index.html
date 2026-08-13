@@ -104,7 +104,7 @@
     <div class="s-card">
       <h3>Steuerjahr 2026 · alle Objekte</h3>
       <div class="total" id="sumTotal">€0.00</div>
-      <div style="font-size:12px;color:var(--muted)">absetzbare Ausgaben gesamt</div>
+      <div style="font-size:12px;color:var(--muted)">erfasste Ausgaben gesamt</div>
     </div>
     <div class="s-card">
       <h3>Nach Kostenart</h3>
@@ -114,20 +114,20 @@
       <h3>Nach Objekt</h3>
       <div id="sumProps"></div>
     </div>
-    <button class="export-btn" onclick="openExport()">📤 Steuerfertige Zusammenfassung exportieren</button>
+    <button class="export-btn" onclick="openExport()">📤 Übersicht als PDF exportieren</button>
     <div class="gdpr">DSGVO: Belege EU-verschlüsselt gespeichert · Originalbilder nach 90 Tagen automatisch gelöscht</div>
   </div>
 </div>
 
 <div class="foot">
-  Klick-Dummy – es wird nichts echt geparst oder verrechnet. Ablauf: Foto rein → KI erfasst → mit einem Tipp bestätigen → steuerfertige Abzugsposition.
+  Klick-Dummy – es wird nichts echt geparst oder verrechnet. Ablauf: Foto rein → KI erfasst → mit einem Tipp bestätigen. Keine Steuerberatung – ob etwas absetzbar ist, klärt deine Steuerberatung.
 </div>
 
 <!-- EXPORT MODAL -->
 <div class="modal" id="modal">
   <div class="modal-inner">
-    <h3>📤 Steuerfertiger Export</h3>
-    <p>Steuerfertige Zusammenfassung aller erfassten Abzugspositionen. Belege bleiben EU-verschlüsselt gespeichert.</p>
+    <h3>📤 Export als PDF</h3>
+    <p>Zusammenfassung aller erfassten Ausgaben – bereit für deine Steuerunterlagen. Belege bleiben EU-verschlüsselt gespeichert.</p>
     <div class="plan hot" onclick="selectPlan('sub')">
       <div class="p-name"><span>Ganzjährig automatisch erfassen</span><span class="p-price">€79/Jahr</span></div>
       <div class="p-desc">pro Objekt · unbegrenztes Erfassen · Monatsübersichten · Exporte inklusive</div>
@@ -154,7 +154,7 @@ const SAMPLES = [
   {name:'Handwerker-Rechnung', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, costType:'Reparaturen', share:100, property:'Wohnung 12 · Wien', flagged:'', confidence:91},
   {name:'Reinigungsservice', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, costType:'Reinigung', share:100, property:'Eigenheim · Graz', flagged:'', confidence:98},
   {name:'Tankstelle & Maut', file:'IMG_2955.jpg', vendor:'ÖAMTC Tankstelle', amount:32.50, costType:'Fahrtkosten', share:100, property:'Wohnung 12 · Wien', flagged:'', confidence:94},
-  {name:'Grundsteuer', file:'IMG_2988.jpg', vendor:'Magistrat Wien', amount:58.00, costType:'Grundsteuer', share:40, property:'Eigenheim · Graz', flagged:'Gästezimmer: anteilig 🔎', confidence:99},
+  {name:'Grundsteuer', file:'IMG_2988.jpg', vendor:'Magistrat Wien', amount:58.00, costType:'Grundsteuer', share:40, property:'Eigenheim · Graz', flagged:'Eigenheim: Anteil 40 % 🔎', confidence:99},
   {name:'Möbel (IKEA)', file:'IMG_3012.jpg', vendor:'IKEA Wien', amount:129.00, costType:'Möbel & Ausstattung', share:100, property:'Eigenheim · Graz', flagged:'', confidence:97},
 ];
 
@@ -175,7 +175,7 @@ function typingBubble(){
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function init(){
-  bubble('bot','👋 Hallo! Ich bin der HostReceipts-Bot. Schick mir einen Beleg oder eine Betriebskosten-Rechnung und ich erfasse sie als <b>steuerfertige Abzugsposition</b> für dein Objekt. Probier\'s aus!');
+  bubble('bot','👋 Hallo! Ich bin der HostReceipts-Bot. Schick mir einen Beleg oder eine Betriebskosten-Rechnung und ich erfasse ihn sauber für dein Objekt. Probier\'s aus!');
   bubble('bot','Tippe einen Beispielbeleg zum Senden an – oder nutze 📎 mit einem echten Foto (Erkennung ist im Dummy simuliert):');
   const row = document.createElement('div');
   SAMPLES.forEach((s,i)=> { const c = document.createElement('button'); c.className='chip'; c.textContent=s.name; c.onclick=()=>sendSample(i); row.appendChild(c); });
@@ -243,7 +243,7 @@ function logEntry(){
   e.el.remove(); lastConfirmed = null;
   bubble('bot','✅ <b>Erfasst!</b> €'+e.amount.toFixed(2)+' · '+e.category+' · '+e.property.replace(' · Wien','').replace(' · Graz',''));
   const month = entries.reduce((s,x)=>s+x.amount,0);
-  bubble('bot','Diesen Monat: <b>€'+month.toFixed(2)+'</b> absetzbare Ausgaben über deine Objekte. 💰 <button class="chip" onclick="showTab(\'summary\')">Monatsübersicht ansehen</button>');
+  bubble('bot','Diesen Monat: <b>€'+month.toFixed(2)+'</b> erfasste Ausgaben über deine Objekte. 💰 <button class="chip" onclick="showTab(\'summary\')">Monatsübersicht ansehen</button>');
   renderSummary();
 }
 
@@ -324,7 +324,7 @@ function makeTaxPdf(entries){
     flush(); pageN++; y=topY;
     ops.push('0.027 0.369 0.329 rg 0 '+(841.89-headerH)+' 595.28 '+headerH+' re f');
     ops.push('1 1 1 rg BT /F2 20 Tf 1 0 0 1 56 '+(841.89-58)+' Tm (HostReceipts) Tj ET');
-    ops.push('BT /F1 10 Tf 1 0 0 1 56 '+(841.89-76)+' Tm ('+pdfEsc('WhatsApp Steuer-Logger · steuerfertige Ausgabenübersicht')+') Tj ET');
+    ops.push('BT /F1 10 Tf 1 0 0 1 56 '+(841.89-76)+' Tm ('+pdfEsc('WhatsApp Steuer-Logger · Ausgabenübersicht')+') Tj ET');
     ops.push('BT /F2 26 Tf 0.9 g 0.707 0.707 -0.707 0.707 66 212 Tm ('+pdfEsc(WAT)+') Tj ET');
     ops.push('0 0 0 rg BT /F1 8 Tf 1 0 0 1 56 62 Tm ('+pdfEsc('HostReceipts · Klick-Dummy – simulierte Daten, keine Steuerberatung')+') Tj ET');
     ops.push('BT /F1 8 Tf 1 0 0 1 56 48 Tm (DSGVO: Belege EU-verschlüsselt · Originalbilder nach 90 Tagen automatisch gelöscht) Tj ET');
@@ -344,14 +344,14 @@ function makeTaxPdf(entries){
   }
   function need(h){ if(y-h<84) startPage(); }
   startPage();
-  txt('Steuerfertige Ausgabenübersicht',56,y,16,'/F2'); y-=24;
+  txt('Ausgabenübersicht',56,y,16,'/F2'); y-=24;
   txt('Steuerjahr 2026 · alle Objekte · erstellt am '+new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric'}),56,y,9,'/F1','0.42 0.44 0.48'); y-=18;
   ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=14;
   const rowH=20;
   txt('#',56,y,9,'/F2'); txt('Anbieter',70,y,9,'/F2'); txt('Betrag',238,y,9,'/F2',null,'r'); txt('Kostenart',246,y,9,'/F2'); txt('Anteil',350,y,9,'/F2'); txt('Objekt',400,y,9,'/F2'); txt('Datum',492,y,9,'/F2');
   y-=rowH;
   if(entries.length===0){
-    txt('Noch keine Abzugspositionen – bitte einen Beleg im Chat erfassen.',56,y,9); y-=rowH;
+    txt('Noch keine Ausgaben erfasst – bitte einen Beleg im Chat erfassen.',56,y,9); y-=rowH;
   }
   entries.forEach((e,i)=>{
     need(rowH);
@@ -369,7 +369,7 @@ function makeTaxPdf(entries){
   ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=18;
   const sh=e=>(e.share==null?100:e.share)/100;
   const total=entries.reduce((s,e)=>s+e.amount*sh(e),0);
-  txt('Abzugsfähige Ausgaben gesamt · Steuerjahr 2026',56,y,13,'/F2');
+  txt('Erfasste Ausgaben gesamt · Steuerjahr 2026',56,y,13,'/F2');
   txt(fit(fmtE(total),120,13,'/F2'),539.28,y,13,'/F2',null,'r'); y-=28;
   const types=COST_TYPES;
   const tsum={}; types.forEach(t=>tsum[t]=0);
@@ -380,8 +380,8 @@ function makeTaxPdf(entries){
   txt('Nach Objekt',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
   Object.entries(props).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
   need(30);
-  txt('Hinweis: Gästezimmer-Objekt – laufende Kosten (z. B. Grundsteuer) nur anteilig absetzbar.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
-  txt('Reinigung, Möbel & Reparaturen sind zu 100 % absetzbar · simulierte Beispieldaten.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
+  txt('Hinweis: Bei anteiliger Zuordnung (z. B. Gästezimmer) fließt nur der hinterlegte Anteil ein – simulierte Beispieldaten.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
+  txt('Keine Steuerberatung: Ob und wie viel absetzbar ist, beurteilt deine Steuerberatung.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
   flush();
   return buildPdfFile(pages);
 }
@@ -393,7 +393,7 @@ function doExport(){
   a.href = URL.createObjectURL(new Blob([pdfBytes(pdf)],{type:'application/pdf'}));
   a.download = 'hostreceipts-steuer-2026-demo.pdf';
   a.click();
-  bubble('bot','📤 <b>Export fertig!</b> Steuerjahr-Zusammenfassung als PDF angehängt (Demo-Wasserzeichen) – bereit für die Steuererklärung. '+(plan==='sub'?'🔒 Abonniert €79/Jahr: automatisches Erfassen + Monatsübersichten aktiv.':'🔒 €29-Export-Pass aktiviert.'));
+  bubble('bot','📤 <b>Export fertig!</b> Zusammenfassung als PDF angehängt (Demo-Wasserzeichen) – bereit für deine Steuerunterlagen. '+(plan==='sub'?'🔒 Abonniert €79/Jahr: automatisches Erfassen + Monatsübersichten aktiv.':'🔒 €29-Export-Pass aktiviert.'));
   showTab('chat');
 }
 
