@@ -107,8 +107,8 @@
       <div style="font-size:12px;color:var(--muted)">erfasste Ausgaben gesamt</div>
     </div>
     <div class="s-card">
-      <h3>Nach Kostenart</h3>
-      <div id="sumTypes"></div>
+      <h3>Nach Kategorie</h3>
+      <div id="sumCats"></div>
     </div>
     <div class="s-card">
       <h3>Nach Objekt</h3>
@@ -147,15 +147,15 @@ const entries = [];  // {vendor, amount, date, category, property, confidence, f
 let lastConfirmed = null;
 let plan = 'sub';
 
-const COST_TYPES=['Darlehenszinsen','Gebäude-AfA','Grundsteuer','Gebäudeversicherung','Wasser/Heizung/Strom','Müll & Nebenkosten','Reparaturen','Steuerberatung','Inserate & Plattform','Möbel & Ausstattung','Reinigung','Fahrtkosten'];
+const KATEGORIEN=['Strom/Energie ⚡','Reparatur 🔧','Reinigung 🧹','Verbrauchsmaterial 🧻','Fahrt/Tanken 🚗','Möbel/Ausstattung 🛋','Abgaben 📄'];
 
 const SAMPLES = [
-  {name:'Stromrechnung', file:'IMG_2841.jpg', vendor:'Wien Energie', amount:214.60, costType:'Wasser/Heizung/Strom', share:100, property:'Wohnung 12 · Wien', flagged:'Sommer-AC-Spitze 🔎', confidence:96},
-  {name:'Handwerker-Rechnung', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, costType:'Reparaturen', share:100, property:'Wohnung 12 · Wien', flagged:'', confidence:91},
-  {name:'Reinigungsservice', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, costType:'Reinigung', share:100, property:'Eigenheim · Graz', flagged:'', confidence:98},
-  {name:'Tankstelle & Maut', file:'IMG_2955.jpg', vendor:'ÖAMTC Tankstelle', amount:32.50, costType:'Fahrtkosten', share:100, property:'Wohnung 12 · Wien', flagged:'', confidence:94},
-  {name:'Grundsteuer', file:'IMG_2988.jpg', vendor:'Magistrat Wien', amount:58.00, costType:'Grundsteuer', share:40, property:'Eigenheim · Graz', flagged:'Eigenheim: Anteil 40 % 🔎', confidence:99},
-  {name:'Möbel (IKEA)', file:'IMG_3012.jpg', vendor:'IKEA Wien', amount:129.00, costType:'Möbel & Ausstattung', share:100, property:'Eigenheim · Graz', flagged:'', confidence:97},
+  {name:'Stromrechnung', file:'IMG_2841.jpg', vendor:'Wien Energie', amount:214.60, category:'Strom/Energie ⚡', property:'Wohnung 12 · Wien', flagged:'Sommer-AC-Spitze 🔎', confidence:96},
+  {name:'Handwerker-Rechnung', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, category:'Reparatur 🔧', property:'Wohnung 12 · Wien', flagged:'', confidence:91},
+  {name:'Reinigungsservice', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, category:'Reinigung 🧹', property:'Studio 4 · Graz', flagged:'', confidence:98},
+  {name:'Tankstelle & Maut', file:'IMG_2955.jpg', vendor:'ÖAMTC Tankstelle', amount:32.50, category:'Fahrt/Tanken 🚗', property:'Wohnung 12 · Wien', flagged:'', confidence:94},
+  {name:'Grundsteuer', file:'IMG_2988.jpg', vendor:'Magistrat Wien', amount:58.00, category:'Abgaben 📄', property:'Studio 4 · Graz', flagged:'', confidence:99},
+  {name:'Möbel (IKEA)', file:'IMG_3012.jpg', vendor:'IKEA Wien', amount:129.00, category:'Möbel/Ausstattung 🛋', property:'Studio 4 · Graz', flagged:'', confidence:97},
 ];
 
 function bubble(cls, html){ 
@@ -187,7 +187,7 @@ async function sendSample(i){
   bubble('user','📷 Beleg wird gesendet… <b>'+s.file+'</b>');
   const t = typingBubble();
   await sleep(900); t.remove();
-  await parseCard(s.vendor, s.amount, s.property, s.flagged, s.confidence, s.file, s.costType, s.share);
+  await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, s.file);
 }
 
 async function sendUploaded(input){
@@ -197,23 +197,22 @@ async function sendUploaded(input){
   await sleep(1200); t.remove();
   // simulated parse — deterministic pick from samples
   const s = SAMPLES[Math.floor(Math.random()*SAMPLES.length)];
-  await parseCard(s.vendor, s.amount, s.property, s.flagged, s.confidence, f.name, s.costType, s.share);
+  await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, f.name);
   input.value = '';
 }
 
-async function parseCard(vendor, amount, property, flagged, confidence, file, costType, share){
+async function parseCard(vendor, amount, category, property, flagged, confidence, file){
   bubble('bot','Erfasse Beleg… einen Moment 🔎');
   await sleep(700);
   const card = bubble('bot','<div class="parse-card" id="parseCard"><h4>Erfasst · '+file+' <span class="conf">'+confidence+'% Konfidenz</span></h4>'+
     '<div class="kv"><span>Anbieter</span><b>'+vendor+'</b></div>'+
     '<div class="kv"><span>Betrag</span><b>€'+amount.toFixed(2)+'</b></div>'+
     '<div class="kv"><span>Datum</span><b>01.08.2026</b></div>'+
-    '<div class="kv"><span>Kostenart</span><b>'+costType+'</b></div>'+
-    '<div class="kv"><span>Anteil</span><b>'+(share==null?100:share)+' %</b></div>'+
+    '<div class="kv"><span>Kategorie</span><b>'+category+'</b></div>'+
     '<div class="kv"><span>Objekt</span><b>'+property+'</b></div>'+
     (flagged?'<div class="flag">'+flagged+'</div>':'')+
     '<div class="confirm-row"><button class="btn ok" onclick="confirmLog()">✅ Bestätigen</button><button class="btn edit" onclick="editCard()">✏️ Korrigieren</button></div></div>');
-  lastConfirmed = {vendor, amount, property, flagged, confidence, costType, share: share==null?100:share, el: card};
+  lastConfirmed = {vendor, amount, category, property, flagged, confidence, el: card};
 }
 
 function editCard(){
@@ -221,17 +220,15 @@ function editCard(){
   p.querySelector('.confirm-row').remove();
   const f = document.createElement('div');
   f.className = 'edit-form';
-  f.innerHTML = '<input id="edAmt" type="number" step="0.01" value="'+lastConfirmed.amount+'"><select id="edType">'+
-    COST_TYPES.map(t=>'<option'+(t===lastConfirmed.costType?' selected':'')+'>'+t+'</option>').join('')+
-    '</select><input id="edShare" type="number" min="0" max="100" step="1" value="'+lastConfirmed.share+'"><label style="font-size:11px;color:var(--muted)">% Anteil (Gästezimmer: anteilig)</label>'+
-    '<button class="btn ok" onclick="saveEdit()">✅ Speichern & erfassen</button>';
+  f.innerHTML = '<input id="edAmt" type="number" step="0.01" value="'+lastConfirmed.amount+'"><select id="edCat">'+
+    KATEGORIEN.map(c=>'<option'+(c===lastConfirmed.category?' selected':'')+'>'+c+'</option>').join('')+
+    '</select><button class="btn ok" onclick="saveEdit()">✅ Speichern & erfassen</button>';
   p.appendChild(f);
 }
 
 function saveEdit(){
   lastConfirmed.amount = parseFloat(document.getElementById('edAmt').value)||0;
-  lastConfirmed.costType = document.getElementById('edType').value;
-  lastConfirmed.share = Math.min(100, Math.max(0, parseFloat(document.getElementById('edShare').value)||100));
+  lastConfirmed.category = document.getElementById('edCat').value;
   logEntry();
 }
 
@@ -239,7 +236,7 @@ function confirmLog(){ logEntry(); }
 
 function logEntry(){
   const e = lastConfirmed; if(!e) return;
-  entries.push({vendor:e.vendor, amount:e.amount, costType:e.costType, share:e.share, property:e.property, flagged:e.flagged});
+  entries.push({vendor:e.vendor, amount:e.amount, category:e.category, property:e.property, flagged:e.flagged});
   e.el.remove(); lastConfirmed = null;
   bubble('bot','✅ <b>Erfasst!</b> €'+e.amount.toFixed(2)+' · '+e.category+' · '+e.property.replace(' · Wien','').replace(' · Graz',''));
   const month = entries.reduce((s,x)=>s+x.amount,0);
@@ -249,15 +246,15 @@ function logEntry(){
 
 function renderSummary(){
   const fmt = n => '€' + n.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2});
-  const sh = e => (e.share==null?100:e.share)/100;
-  const total = entries.reduce((s,x)=>s+x.amount*sh(x),0);
+  const total = entries.reduce((s,x)=>s+x.amount,0);
   document.getElementById('sumTotal').textContent = fmt(total);
-  const tsum = {}; COST_TYPES.forEach(t=>tsum[t]=0);
-  entries.forEach(e => tsum[e.costType] = (tsum[e.costType]||0) + e.amount*sh(e));
-  document.getElementById('sumTypes').innerHTML = COST_TYPES.map(t=>
-    '<div class="cat"><span>'+t+'</span><span class="amt">'+fmt(tsum[t])+'</span></div>').join('');
+  const cats = {};
+  entries.forEach(e => cats[e.category] = (cats[e.category]||0) + e.amount);
+  document.getElementById('sumCats').innerHTML = Object.entries(cats).map(([k,v])=>
+    '<div class="cat"><span>'+k+'</span><span class="amt">'+fmt(v)+'</span></div>').join('') ||
+    '<div class="empty-note">Noch keine Ausgaben erfasst – geh in den Chat 📸</div>';
   const props = {};
-  entries.forEach(e => { const p = e.property.split(' · ')[0]; props[p] = (props[p]||0) + e.amount*sh(e); });
+  entries.forEach(e => { const p = e.property.split(' · ')[0]; props[p] = (props[p]||0) + e.amount; });
   document.getElementById('sumProps').innerHTML = Object.entries(props).map(([k,v])=>
     '<div class="cat"><span>🏠 '+k+'</span><span class="amt">'+fmt(v)+'</span></div>').join('') ||
     '<div class="empty-note">—</div>';
@@ -348,7 +345,7 @@ function makeTaxPdf(entries){
   txt('Steuerjahr 2026 · alle Objekte · erstellt am '+new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric'}),56,y,9,'/F1','0.42 0.44 0.48'); y-=18;
   ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=14;
   const rowH=20;
-  txt('#',56,y,9,'/F2'); txt('Anbieter',70,y,9,'/F2'); txt('Betrag',238,y,9,'/F2',null,'r'); txt('Kostenart',246,y,9,'/F2'); txt('Anteil',350,y,9,'/F2'); txt('Objekt',400,y,9,'/F2'); txt('Datum',492,y,9,'/F2');
+  txt('#',56,y,9,'/F2'); txt('Anbieter',70,y,9,'/F2'); txt('Betrag',238,y,9,'/F2',null,'r'); txt('Kategorie',246,y,9,'/F2'); txt('Objekt',370,y,9,'/F2'); txt('Datum',470,y,9,'/F2');
   y-=rowH;
   if(entries.length===0){
     txt('Noch keine Ausgaben erfasst – bitte einen Beleg im Chat erfassen.',56,y,9); y-=rowH;
@@ -359,28 +356,24 @@ function makeTaxPdf(entries){
     txt(String(i+1),56,y,9);
     txt(fit(e.vendor,102,9),70,y,9);
     txt(fit(fmtE(e.amount),60,9),238,y,9,'/F1',null,'r');
-    txt(fit(e.costType||'—',96,9),246,y,9);
-    txt((e.share==null?100:e.share)+' %',350,y,9);
-    txt(fit(e.property,92,9),400,y,9);
-    txt('01.08.2026',492,y,9);
+    txt(fit(e.category||'—',110,9),246,y,9);
+    txt(fit(e.property,92,9),370,y,9);
+    txt('01.08.2026',470,y,9);
     y-=rowH;
   });
-  need(240);
+  need(200);
   ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=18;
-  const sh=e=>(e.share==null?100:e.share)/100;
-  const total=entries.reduce((s,e)=>s+e.amount*sh(e),0);
+  const total=entries.reduce((s,e)=>s+e.amount,0);
   txt('Erfasste Ausgaben gesamt · Steuerjahr 2026',56,y,13,'/F2');
   txt(fit(fmtE(total),120,13,'/F2'),539.28,y,13,'/F2',null,'r'); y-=28;
-  const types=COST_TYPES;
-  const tsum={}; types.forEach(t=>tsum[t]=0);
-  entries.forEach(e=>{ tsum[e.costType]=(tsum[e.costType]||0)+e.amount*sh(e); });
-  txt('Nach Kostenart',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
-  types.forEach(t=>{ need(16); const pct=total?Math.round(100*tsum[t]/total):0; txt('• '+t,60,y,9); txt(fit(fmtE(tsum[t])+' ('+pct+'%)',120,9),539.28,y,9,null,null,'r'); y-=16; });
-  const props={}; entries.forEach(e=>{ const p=e.property.split(' · ')[0]; props[p]=(props[p]||0)+e.amount*sh(e); });
+  const cats={}; entries.forEach(e=>{ cats[e.category]=(cats[e.category]||0)+e.amount; });
+  txt('Nach Kategorie',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
+  Object.entries(cats).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
+  const props={}; entries.forEach(e=>{ const p=e.property.split(' · ')[0]; props[p]=(props[p]||0)+e.amount; });
   txt('Nach Objekt',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
   Object.entries(props).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
   need(30);
-  txt('Hinweis: Bei anteiliger Zuordnung (z. B. Gästezimmer) fließt nur der hinterlegte Anteil ein – simulierte Beispieldaten.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
+  txt('Alle Beträge sind simulierte Beispieldaten.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
   txt('Keine Steuerberatung: Ob und wie viel absetzbar ist, beurteilt deine Steuerberatung.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
   flush();
   return buildPdfFile(pages);
