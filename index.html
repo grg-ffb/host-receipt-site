@@ -107,6 +107,10 @@
       <div style="font-size:12px;color:var(--muted)">total deductible expenses logged</div>
     </div>
     <div class="s-card">
+      <h3>By cost type</h3>
+      <div id="sumTypes"></div>
+    </div>
+    <div class="s-card">
       <h3>By category</h3>
       <div id="sumCats"></div>
     </div>
@@ -150,9 +154,11 @@ let plan = 'sub';
 const CAT_COLORS = {'Utilities ⚡':'#0f766e','Repairs 🔧':'#b45309','Cleaning 🧹':'#7c3aed','Supplies 🧻':'#2563eb','Fees 📄':'#dc2626'};
 
 const SAMPLES = [
-  {name:'Electricity bill', file:'IMG_2841.jpg', vendor:'Wien Energie', amount:214.60, category:'Utilities ⚡', property:'Apartment 12 · Wien', flagged:'Summer AC spike 🔎', confidence:96},
-  {name:'Contractor repair', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, category:'Repairs 🔧', property:'Apartment 12 · Wien', flagged:'', confidence:91},
-  {name:'Cleaning service', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, category:'Cleaning 🧹', property:'Studio 4 · Graz', flagged:'', confidence:98},
+  {name:'Electricity bill', file:'IMG_2841.jpg', vendor:'Wien Energie', amount:214.60, category:'Utilities ⚡', property:'Apartment 12 · Wien', flagged:'Summer AC spike 🔎', confidence:96, costType:'Materials'},
+  {name:'Contractor repair', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, category:'Repairs 🔧', property:'Apartment 12 · Wien', flagged:'', confidence:91, costType:'Workforce'},
+  {name:'Cleaning service', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, category:'Cleaning 🧹', property:'Studio 4 · Graz', flagged:'', confidence:98, costType:'Workforce'},
+  {name:'Fuel & tolls', file:'IMG_2955.jpg', vendor:'ÖAMTC Tankstelle', amount:32.50, category:'Traveling 🚗', property:'Apartment 12 · Wien', flagged:'', confidence:94, costType:'Traveling'},
+  {name:'Tourist tax', file:'IMG_2988.jpg', vendor:'Magistrat Wien', amount:58.00, category:'Fees 📄', property:'Studio 4 · Graz', flagged:'', confidence:99, costType:'Taxes'},
 ];
 
 function bubble(cls, html){ 
@@ -184,7 +190,7 @@ async function sendSample(i){
   bubble('user','📷 Sending receipt… <b>'+s.file+'</b>');
   const t = typingBubble();
   await sleep(900); t.remove();
-  await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, s.file);
+  await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, s.file, s.costType);
 }
 
 async function sendUploaded(input){
@@ -194,22 +200,23 @@ async function sendUploaded(input){
   await sleep(1200); t.remove();
   // simulated parse — deterministic pick from samples
   const s = SAMPLES[Math.floor(Math.random()*SAMPLES.length)];
-  await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, f.name);
+  await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, f.name, s.costType);
   input.value = '';
 }
 
-async function parseCard(vendor, amount, category, property, flagged, confidence, file){
+async function parseCard(vendor, amount, category, property, flagged, confidence, file, costType){
   bubble('bot','Parsing… one sec 🔎');
   await sleep(700);
   const card = bubble('bot','<div class="parse-card" id="parseCard"><h4>Parsed · '+file+' <span class="conf">'+confidence+'% confidence</span></h4>'+
     '<div class="kv"><span>Vendor</span><b>'+vendor+'</b></div>'+
     '<div class="kv"><span>Amount</span><b>€'+amount.toFixed(2)+'</b></div>'+
     '<div class="kv"><span>Date</span><b>01 Aug 2026</b></div>'+
+    '<div class="kv"><span>Cost type</span><b>'+costType+'</b></div>'+
     '<div class="kv"><span>Category</span><b>'+category+'</b></div>'+
     '<div class="kv"><span>Property</span><b>'+property+'</b></div>'+
     (flagged?'<div class="flag">'+flagged+'</div>':'')+
     '<div class="confirm-row"><button class="btn ok" onclick="confirmLog()">✅ Confirm</button><button class="btn edit" onclick="editCard()">✏️ Correct</button></div></div>');
-  lastConfirmed = {vendor, amount, category, property, flagged, confidence, el: card};
+  lastConfirmed = {vendor, amount, category, property, flagged, confidence, costType, el: card};
 }
 
 function editCard(){
@@ -218,7 +225,9 @@ function editCard(){
   const f = document.createElement('div');
   f.className = 'edit-form';
   f.innerHTML = '<input id="edAmt" type="number" step="0.01" value="'+lastConfirmed.amount+'"><select id="edCat">'+
-    ['Utilities ⚡','Repairs 🔧','Cleaning 🧹','Supplies 🧻','Fees 📄'].map(c=>'<option'+(c===lastConfirmed.category?' selected':'')+'>'+c+'</option>').join('')+
+    ['Utilities ⚡','Repairs 🔧','Cleaning 🧹','Supplies 🧻','Fees 📄','Traveling 🚗'].map(c=>'<option'+(c===lastConfirmed.category?' selected':'')+'>'+c+'</option>').join('')+
+    '</select><select id="edType">'+
+    ['Materials','Workforce','Traveling','Taxes'].map(t=>'<option'+(t===lastConfirmed.costType?' selected':'')+'>'+t+'</option>').join('')+
     '</select><button class="btn ok" onclick="saveEdit()">✅ Save & log</button>';
   p.appendChild(f);
 }
@@ -226,6 +235,7 @@ function editCard(){
 function saveEdit(){
   lastConfirmed.amount = parseFloat(document.getElementById('edAmt').value)||0;
   lastConfirmed.category = document.getElementById('edCat').value;
+  lastConfirmed.costType = document.getElementById('edType').value;
   logEntry();
 }
 
@@ -233,7 +243,7 @@ function confirmLog(){ logEntry(); }
 
 function logEntry(){
   const e = lastConfirmed; if(!e) return;
-  entries.push({vendor:e.vendor, amount:e.amount, category:e.category, property:e.property, flagged:e.flagged});
+  entries.push({vendor:e.vendor, amount:e.amount, category:e.category, property:e.property, flagged:e.flagged, costType:e.costType});
   e.el.remove(); lastConfirmed = null;
   bubble('bot','✅ <b>Logged!</b> €'+e.amount.toFixed(2)+' · '+e.category+' · '+e.property.replace(' · Wien','').replace(' · Graz',''));
   const month = entries.reduce((s,x)=>s+x.amount,0);
@@ -245,6 +255,11 @@ function renderSummary(){
   const fmt = n => '€' + n.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2});
   const total = entries.reduce((s,x)=>s+x.amount,0);
   document.getElementById('sumTotal').textContent = fmt(total);
+  const types = ['Materials','Workforce','Traveling','Taxes'];
+  const tsum = {}; types.forEach(t=>tsum[t]=0);
+  entries.forEach(e => tsum[e.costType] = (tsum[e.costType]||0) + e.amount);
+  document.getElementById('sumTypes').innerHTML = types.map(t=>
+    '<div class="cat"><span>'+t+'</span><span class="amt">'+fmt(tsum[t])+'</span></div>').join('');
   const cats = {};
   entries.forEach(e => cats[e.category] = (cats[e.category]||0) + e.amount);
   document.getElementById('sumCats').innerHTML = Object.entries(cats).map(([k,v])=>
@@ -339,7 +354,7 @@ function makeTaxPdf(entries){
   txt('Tax year 2026 · all properties · generated '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),56,y,9,'/F1','0.42 0.44 0.48'); y-=18;
   ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=14;
   const rowH=20;
-  txt('#',56,y,9,'/F2'); txt('Vendor',78,y,9,'/F2'); txt('Amount',242,y,9,'/F2',null,'r'); txt('Category',254,y,9,'/F2'); txt('Property',336,y,9,'/F2'); txt('Date',436,y,9,'/F2'); txt('Status',489,y,9,'/F2');
+  txt('#',56,y,9,'/F2'); txt('Vendor',74,y,9,'/F2'); txt('Amount',236,y,9,'/F2',null,'r'); txt('Type',252,y,9,'/F2'); txt('Category',316,y,9,'/F2'); txt('Property',372,y,9,'/F2'); txt('Date',474,y,9,'/F2');
   y-=rowH;
   if(entries.length===0){
     txt('No deductions logged yet — send a sample receipt in Chat.',56,y,9); y-=rowH;
@@ -348,19 +363,24 @@ function makeTaxPdf(entries){
     need(rowH);
     if(i%2===0) ops.push('0.95 g 56 '+(y-rowH+6)+' 483.28 '+rowH+' re f');
     txt(String(i+1),56,y,9);
-    txt(fit(e.vendor,112,9),78,y,9);
-    txt(fit(fmtE(e.amount),60,9),242,y,9,'/F1',null,'r');
-    txt(fit(e.category,82,9),254,y,9);
-    txt(fit(e.property,100,9),336,y,9);
-    txt('2026-08-01',436,y,9);
-    txt('confirmed',489,y,9);
+    txt(fit(e.vendor,100,9),74,y,9);
+    txt(fit(fmtE(e.amount),60,9),236,y,9,'/F1',null,'r');
+    txt(fit(e.costType||'—',58,9),252,y,9);
+    txt(fit(e.category,56,9),316,y,9);
+    txt(fit(e.property,92,9),372,y,9);
+    txt('2026-08-01',474,y,9);
     y-=rowH;
   });
-  need(150);
+  need(240);
   ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=18;
   const total=entries.reduce((s,e)=>s+e.amount,0);
   txt('Total deductible expenses · tax year 2026',56,y,13,'/F2');
   txt(fit(fmtE(total),120,13),539.28,y,13,'/F2',null,'r'); y-=28;
+  const types=['Materials','Workforce','Traveling','Taxes'];
+  const tsum={}; types.forEach(t=>tsum[t]=0);
+  entries.forEach(e=>{ tsum[e.costType]=(tsum[e.costType]||0)+e.amount; });
+  txt('By cost type',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
+  types.forEach(t=>{ need(16); const pct=total?Math.round(100*tsum[t]/total):0; txt('• '+t,60,y,9); txt(fit(fmtE(tsum[t])+' ('+pct+'%)',120,9),539.28,y,9,null,null,'r'); y-=16; });
   const cats={}; entries.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);
   txt('By category',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
   Object.entries(cats).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
