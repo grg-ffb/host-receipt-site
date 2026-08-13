@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HostReceipts — WhatsApp Tax Logger (Demo)</title>
+<title>HostReceipts — WhatsApp Steuer-Logger (Demo)</title>
 <style>
   :root{--wa:#075e54;--wa2:#128c7e;--wa3:#25d366;--bg:#e5ddd5;--bubble:#fff;--bubble2:#dcf8c6;--ink:#1a1f2e;--muted:#6b7280;--accent:#f59e0b;}
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -74,8 +74,8 @@
 </head>
 <body>
 <div class="topbar">
-  <div class="logo">🧾 HostReceipts <span>· WhatsApp tax logger</span></div>
-  <div class="live">● click dummy</div>
+  <div class="logo">🧾 HostReceipts <span>· WhatsApp Steuer-Logger</span></div>
+  <div class="live">● Klick-Dummy</div>
 </div>
 
 <div class="phone">
@@ -88,7 +88,7 @@
   </div>
   <div class="tabs">
     <div class="tab active" id="tabChat" onclick="showTab('chat')">💬 Chat</div>
-    <div class="tab" id="tabSum" onclick="showTab('summary')">📊 Summary</div>
+    <div class="tab" id="tabSum" onclick="showTab('summary')">📊 Zusammenfassung</div>
   </div>
 
   <!-- CHAT -->
@@ -96,52 +96,52 @@
   <div class="attach">
     <label for="fileInput" title="Send a receipt photo">📎</label>
     <input type="file" id="fileInput" accept="image/*" onchange="sendUploaded(this)">
-    <div class="fake-input">Message… (tap a sample receipt or 📎)</div>
+    <div class="fake-input">Nachricht… (Beleg antippen oder 📎)</div>
   </div>
 
   <!-- SUMMARY -->
   <div class="summary" id="summary">
     <div class="s-card">
-      <h3>Tax year 2026 · all properties</h3>
+      <h3>Steuerjahr 2026 · alle Objekte</h3>
       <div class="total" id="sumTotal">€0.00</div>
-      <div style="font-size:12px;color:var(--muted)">total deductible expenses logged</div>
+      <div style="font-size:12px;color:var(--muted)">absetzbare Ausgaben gesamt</div>
     </div>
     <div class="s-card">
-      <h3>By cost type</h3>
+      <h3>Nach Kostenart</h3>
       <div id="sumTypes"></div>
     </div>
     <div class="s-card">
-      <h3>By category</h3>
+      <h3>Nach Kategorie</h3>
       <div id="sumCats"></div>
     </div>
     <div class="s-card">
-      <h3>By property</h3>
+      <h3>Nach Objekt</h3>
       <div id="sumProps"></div>
     </div>
-    <button class="export-btn" onclick="openExport()">📤 Export tax-ready summary</button>
-    <div class="gdpr">GDPR: receipts stored encrypted in the EU · raw images auto-deleted after 90 days</div>
+    <button class="export-btn" onclick="openExport()">📤 Steuerfertige Zusammenfassung exportieren</button>
+    <div class="gdpr">DSGVO: Belege EU-verschlüsselt gespeichert · Originalbilder nach 90 Tagen automatisch gelöscht</div>
   </div>
 </div>
 
 <div class="foot">
-  Click dummy — nothing is parsed or charged. Flow: photo in → AI parses → one-tap confirm → tax-ready deduction.
+  Klick-Dummy – es wird nichts echt geparst oder verrechnet. Ablauf: Foto rein → KI erfasst → mit einem Tipp bestätigen → steuerfertige Abzugsposition.
 </div>
 
 <!-- EXPORT MODAL -->
 <div class="modal" id="modal">
   <div class="modal-inner">
-    <h3>📤 Tax-ready export</h3>
-    <p>Accountant-ready summary of every logged deduction. Raw receipts stay encrypted in the EU.</p>
+    <h3>📤 Steuerfertiger Export</h3>
+    <p>Steuerfertige Zusammenfassung aller erfassten Abzugspositionen. Belege bleiben EU-verschlüsselt gespeichert.</p>
     <div class="plan hot" onclick="selectPlan('sub')">
-      <div class="p-name"><span>Auto-log all year</span><span class="p-price">€79/yr</span></div>
-      <div class="p-desc">per property · unlimited logging · monthly digests · exports included</div>
+      <div class="p-name"><span>Ganzjährig automatisch erfassen</span><span class="p-price">€79/Jahr</span></div>
+      <div class="p-desc">pro Objekt · unbegrenztes Erfassen · Monatsübersichten · Exporte inklusive</div>
     </div>
     <div class="plan" onclick="selectPlan('pass')">
-      <div class="p-name"><span>One-time export</span><span class="p-price">€29</span></div>
-      <div class="p-desc">this tax season only · PDF summary (demo watermarked)</div>
+      <div class="p-name"><span>Einmaliger Export</span><span class="p-price">€29</span></div>
+      <div class="p-desc">nur diese Steuerperiode · PDF-Zusammenfassung (Demo-Wasserzeichen)</div>
     </div>
-    <button class="btn ok" id="modalBtn" onclick="doExport()">Subscribe €79/yr</button>
-    <div style="margin-top:10px;font-size:11px;color:var(--muted)">Demo only — no payment is taken · every PDF is watermarked sample content.</div>
+    <button class="btn ok" id="modalBtn" onclick="doExport()">Abonnieren €79/Jahr</button>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted)">Nur Demo – es wird nichts verrechnet · jede PDF trägt ein Muster-Wasserzeichen.</div>
   </div>
 </div>
 
@@ -154,11 +154,11 @@ let plan = 'sub';
 const CAT_COLORS = {'Utilities ⚡':'#0f766e','Repairs 🔧':'#b45309','Cleaning 🧹':'#7c3aed','Supplies 🧻':'#2563eb','Fees 📄':'#dc2626'};
 
 const SAMPLES = [
-  {name:'Electricity bill', file:'IMG_2841.jpg', vendor:'Wien Energie', amount:214.60, category:'Utilities ⚡', property:'Apartment 12 · Wien', flagged:'Summer AC spike 🔎', confidence:96, costType:'Materials'},
-  {name:'Contractor repair', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, category:'Repairs 🔧', property:'Apartment 12 · Wien', flagged:'', confidence:91, costType:'Workforce'},
-  {name:'Cleaning service', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, category:'Cleaning 🧹', property:'Studio 4 · Graz', flagged:'', confidence:98, costType:'Workforce'},
-  {name:'Fuel & tolls', file:'IMG_2955.jpg', vendor:'ÖAMTC Tankstelle', amount:32.50, category:'Traveling 🚗', property:'Apartment 12 · Wien', flagged:'', confidence:94, costType:'Traveling'},
-  {name:'Tourist tax', file:'IMG_2988.jpg', vendor:'Magistrat Wien', amount:58.00, category:'Fees 📄', property:'Studio 4 · Graz', flagged:'', confidence:99, costType:'Taxes'},
+  {name:'Stromrechnung', file:'IMG_2841.jpg', vendor:'Wien Energie', amount:214.60, category:'Betriebskosten ⚡', property:'Wohnung 12 · Wien', flagged:'Sommer-AC-Spitze 🔎', confidence:96, costType:'Material'},
+  {name:'Handwerker-Rechnung', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, category:'Reparaturen 🔧', property:'Wohnung 12 · Wien', flagged:'', confidence:91, costType:'Arbeit'},
+  {name:'Reinigungsservice', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, category:'Reinigung 🧹', property:'Studio 4 · Graz', flagged:'', confidence:98, costType:'Arbeit'},
+  {name:'Tankstelle & Maut', file:'IMG_2955.jpg', vendor:'ÖAMTC Tankstelle', amount:32.50, category:'Fahrtkosten 🚗', property:'Wohnung 12 · Wien', flagged:'', confidence:94, costType:'Fahrt'},
+  {name:'Grundsteuer', file:'IMG_2988.jpg', vendor:'Magistrat Wien', amount:58.00, category:'Steuern & Abgaben 📄', property:'Studio 4 · Graz', flagged:'', confidence:99, costType:'Steuern'},
 ];
 
 function bubble(cls, html){ 
@@ -178,8 +178,8 @@ function typingBubble(){
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function init(){
-  bubble('bot','👋 Hi! I\'m your HostReceipts bot. Snap any receipt or utility bill and I\'ll log it as a <b>tax-ready deduction</b> for your property. Try me!');
-  bubble('bot','Tap a sample receipt to send it — or use 📎 with a real photo (parsing is simulated in this dummy):');
+  bubble('bot','👋 Hallo! Ich bin der HostReceipts-Bot. Schick mir einen Beleg oder eine Betriebskosten-Rechnung und ich erfasse sie als <b>steuerfertige Abzugsposition</b> für dein Objekt. Probier\'s aus!');
+  bubble('bot','Tippe einen Beispielbeleg zum Senden an – oder nutze 📎 mit einem echten Foto (Erkennung ist im Dummy simuliert):');
   const row = document.createElement('div');
   SAMPLES.forEach((s,i)=> { const c = document.createElement('button'); c.className='chip'; c.textContent=s.name; c.onclick=()=>sendSample(i); row.appendChild(c); });
   chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
@@ -187,7 +187,7 @@ async function init(){
 
 async function sendSample(i){
   const s = SAMPLES[i];
-  bubble('user','📷 Sending receipt… <b>'+s.file+'</b>');
+  bubble('user','📷 Beleg wird gesendet… <b>'+s.file+'</b>');
   const t = typingBubble();
   await sleep(900); t.remove();
   await parseCard(s.vendor, s.amount, s.category, s.property, s.flagged, s.confidence, s.file, s.costType);
@@ -195,7 +195,7 @@ async function sendSample(i){
 
 async function sendUploaded(input){
   const f = input.files[0]; if(!f) return;
-  bubble('user','📷 Sending receipt… <b>'+f.name+'</b>');
+  bubble('user','📷 Beleg wird gesendet… <b>'+f.name+'</b>');
   const t = typingBubble();
   await sleep(1200); t.remove();
   // simulated parse — deterministic pick from samples
@@ -205,17 +205,17 @@ async function sendUploaded(input){
 }
 
 async function parseCard(vendor, amount, category, property, flagged, confidence, file, costType){
-  bubble('bot','Parsing… one sec 🔎');
+  bubble('bot','Erfasse Beleg… einen Moment 🔎');
   await sleep(700);
-  const card = bubble('bot','<div class="parse-card" id="parseCard"><h4>Parsed · '+file+' <span class="conf">'+confidence+'% confidence</span></h4>'+
-    '<div class="kv"><span>Vendor</span><b>'+vendor+'</b></div>'+
-    '<div class="kv"><span>Amount</span><b>€'+amount.toFixed(2)+'</b></div>'+
-    '<div class="kv"><span>Date</span><b>01 Aug 2026</b></div>'+
-    '<div class="kv"><span>Cost type</span><b>'+costType+'</b></div>'+
-    '<div class="kv"><span>Category</span><b>'+category+'</b></div>'+
-    '<div class="kv"><span>Property</span><b>'+property+'</b></div>'+
+  const card = bubble('bot','<div class="parse-card" id="parseCard"><h4>Erfasst · '+file+' <span class="conf">'+confidence+'% Konfidenz</span></h4>'+
+    '<div class="kv"><span>Anbieter</span><b>'+vendor+'</b></div>'+
+    '<div class="kv"><span>Betrag</span><b>€'+amount.toFixed(2)+'</b></div>'+
+    '<div class="kv"><span>Datum</span><b>01.08.2026</b></div>'+
+    '<div class="kv"><span>Kostenart</span><b>'+costType+'</b></div>'+
+    '<div class="kv"><span>Kategorie</span><b>'+category+'</b></div>'+
+    '<div class="kv"><span>Objekt</span><b>'+property+'</b></div>'+
     (flagged?'<div class="flag">'+flagged+'</div>':'')+
-    '<div class="confirm-row"><button class="btn ok" onclick="confirmLog()">✅ Confirm</button><button class="btn edit" onclick="editCard()">✏️ Correct</button></div></div>');
+    '<div class="confirm-row"><button class="btn ok" onclick="confirmLog()">✅ Bestätigen</button><button class="btn edit" onclick="editCard()">✏️ Korrigieren</button></div></div>');
   lastConfirmed = {vendor, amount, category, property, flagged, confidence, costType, el: card};
 }
 
@@ -225,10 +225,10 @@ function editCard(){
   const f = document.createElement('div');
   f.className = 'edit-form';
   f.innerHTML = '<input id="edAmt" type="number" step="0.01" value="'+lastConfirmed.amount+'"><select id="edCat">'+
-    ['Utilities ⚡','Repairs 🔧','Cleaning 🧹','Supplies 🧻','Fees 📄','Traveling 🚗'].map(c=>'<option'+(c===lastConfirmed.category?' selected':'')+'>'+c+'</option>').join('')+
+    ['Betriebskosten ⚡','Reparaturen 🔧','Reinigung 🧹','Verbrauchsmaterial 🧻','Steuern & Abgaben 📄','Fahrtkosten 🚗'].map(c=>'<option'+(c===lastConfirmed.category?' selected':'')+'>'+c+'</option>').join('')+
     '</select><select id="edType">'+
-    ['Materials','Workforce','Traveling','Taxes'].map(t=>'<option'+(t===lastConfirmed.costType?' selected':'')+'>'+t+'</option>').join('')+
-    '</select><button class="btn ok" onclick="saveEdit()">✅ Save & log</button>';
+    ['Material','Arbeit','Fahrt','Steuern'].map(t=>'<option'+(t===lastConfirmed.costType?' selected':'')+'>'+t+'</option>').join('')+
+    '</select><button class="btn ok" onclick="saveEdit()">✅ Speichern & erfassen</button>';
   p.appendChild(f);
 }
 
@@ -245,9 +245,9 @@ function logEntry(){
   const e = lastConfirmed; if(!e) return;
   entries.push({vendor:e.vendor, amount:e.amount, category:e.category, property:e.property, flagged:e.flagged, costType:e.costType});
   e.el.remove(); lastConfirmed = null;
-  bubble('bot','✅ <b>Logged!</b> €'+e.amount.toFixed(2)+' · '+e.category+' · '+e.property.replace(' · Wien','').replace(' · Graz',''));
+  bubble('bot','✅ <b>Erfasst!</b> €'+e.amount.toFixed(2)+' · '+e.category+' · '+e.property.replace(' · Wien','').replace(' · Graz',''));
   const month = entries.reduce((s,x)=>s+x.amount,0);
-  bubble('bot','This month: <b>€'+month.toFixed(2)+'</b> in deductible expenses across your properties. 💰 <button class="chip" onclick="showTab(\'summary\')">View monthly summary</button>');
+  bubble('bot','Diesen Monat: <b>€'+month.toFixed(2)+'</b> absetzbare Ausgaben über deine Objekte. 💰 <button class="chip" onclick="showTab(\'summary\')">Monatsübersicht ansehen</button>');
   renderSummary();
 }
 
@@ -255,7 +255,7 @@ function renderSummary(){
   const fmt = n => '€' + n.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2});
   const total = entries.reduce((s,x)=>s+x.amount,0);
   document.getElementById('sumTotal').textContent = fmt(total);
-  const types = ['Materials','Workforce','Traveling','Taxes'];
+  const types = ['Material','Arbeit','Fahrt','Steuern'];
   const tsum = {}; types.forEach(t=>tsum[t]=0);
   entries.forEach(e => tsum[e.costType] = (tsum[e.costType]||0) + e.amount);
   document.getElementById('sumTypes').innerHTML = types.map(t=>
@@ -264,7 +264,7 @@ function renderSummary(){
   entries.forEach(e => cats[e.category] = (cats[e.category]||0) + e.amount);
   document.getElementById('sumCats').innerHTML = Object.entries(cats).map(([k,v])=>
     '<div class="cat"><span>'+k+'</span><span class="amt">'+fmt(v)+'</span></div>').join('') ||
-    '<div class="empty-note">No deductions logged yet — go to Chat 📸</div>';
+    '<div class="empty-note">Noch keine Abzugspositionen – geh in den Chat 📸</div>';
   const props = {};
   entries.forEach(e => { const p = e.property.split(' · ')[0]; props[p] = (props[p]||0) + e.amount; });
   document.getElementById('sumProps').innerHTML = Object.entries(props).map(([k,v])=>
@@ -282,7 +282,7 @@ function showTab(t){
 }
 
 function openExport(){ document.getElementById('modal').style.display='flex'; }
-function selectPlan(p){ plan=p; document.getElementById('modalBtn').textContent = p==='sub' ? 'Subscribe €79/yr' : 'Pay €29 one-time'; }
+function selectPlan(p){ plan=p; document.getElementById('modalBtn').textContent = p==='sub' ? 'Abonnieren €79/Jahr' : '€29 einmalig zahlen'; }
 /* ---- PDF export (offline, hand-rolled) — demo only: PDF replaces CSV ---- */
 function pdfEsc(s){
   s=String(s)
@@ -320,9 +320,12 @@ function buildPdfFile(streams){
   out+='trailer\n<< /Size '+objs.length+' /Root 1 0 R >>\nstartxref\n'+xs+'\n%%EOF';
   return out;
 }
+/* Helvetica (WinAnsi) advance widths in 1/1000 em — exact column fitting */
+const HELV={' ':278,'!':278,'"':355,'#':556,'$':556,'%':889,'&':667,"'":191,'(':333,')':333,'*':389,'+':584,',':278,'-':333,'.':278,'/':278,'0':556,'1':556,'2':556,'3':556,'4':556,'5':556,'6':556,'7':556,'8':556,'9':556,':':278,';':278,'<':584,'=':584,'>':584,'?':556,'@':1015,'A':667,'B':667,'C':722,'D':722,'E':667,'F':611,'G':778,'H':722,'I':278,'J':500,'K':667,'L':556,'M':833,'N':722,'O':778,'P':667,'Q':778,'R':722,'S':667,'T':611,'U':722,'V':667,'W':944,'X':667,'Y':667,'Z':611,'[':278,'\\':278,']':278,'^':469,'_':556,'`':333,'a':556,'b':556,'c':500,'d':556,'e':556,'f':278,'g':556,'h':556,'i':222,'j':222,'k':500,'l':222,'m':833,'n':556,'o':556,'p':556,'q':556,'r':333,'s':500,'t':278,'u':556,'v':500,'w':722,'x':500,'y':500,'z':500,'{':334,'|':260,'}':334,'~':584,'\u0080':556,'\u0095':350,'\u0096':556,'\u0097':1000,'\u0085':1000,'\u0091':222,'\u0092':222,'\u0093':333,'\u0094':333,'\u00B7':278,'\u00FC':556,'\u00F6':556,'\u00E4':556,'\u00DF':556,'\u00DC':722,'\u00D6':778,'\u00C4':667};
+function tfw(s,font){ let w=0; for(const ch of String(s)) w+=HELV[ch]||556; return w/1000*(font==='/F2'?1.05:1); }
 function makeTaxPdf(entries){
   const fmtE=n=>'€ '+n.toFixed(2).replace('.',',');
-  const WAT='SAMPLE CONTENT – FOR DEMO PURPOSES ONLY';
+  const WAT='MUSTERINHALT – NUR FÜR DEMOZWECKE';
   const pages=[]; let ops=[], y=0, pageN=0;
   const headerH=92, topY=841.89-headerH-22;
   function flush(){ if(ops.length){ pages.push(ops.join('\n')); ops=[]; } }
@@ -330,62 +333,62 @@ function makeTaxPdf(entries){
     flush(); pageN++; y=topY;
     ops.push('0.027 0.369 0.329 rg 0 '+(841.89-headerH)+' 595.28 '+headerH+' re f');
     ops.push('1 1 1 rg BT /F2 20 Tf 1 0 0 1 56 '+(841.89-58)+' Tm (HostReceipts) Tj ET');
-    ops.push('BT /F1 10 Tf 1 0 0 1 56 '+(841.89-76)+' Tm ('+pdfEsc('WhatsApp tax logger · tax-ready expense summary')+') Tj ET');
-    ops.push('BT /F2 30 Tf 0.9 g 0.707 0.707 -0.707 0.707 33 173 Tm ('+pdfEsc(WAT)+') Tj ET');
-    ops.push('0 0 0 rg BT /F1 8 Tf 1 0 0 1 56 62 Tm ('+pdfEsc('HostReceipts · click dummy — simulated data, not tax advice')+') Tj ET');
-    ops.push('BT /F1 8 Tf 1 0 0 1 56 48 Tm (GDPR: receipts stored encrypted in the EU · raw images auto-deleted after 90 days) Tj ET');
+    ops.push('BT /F1 10 Tf 1 0 0 1 56 '+(841.89-76)+' Tm ('+pdfEsc('WhatsApp Steuer-Logger · steuerfertige Ausgabenübersicht')+') Tj ET');
+    ops.push('BT /F2 26 Tf 0.9 g 0.707 0.707 -0.707 0.707 66 212 Tm ('+pdfEsc(WAT)+') Tj ET');
+    ops.push('0 0 0 rg BT /F1 8 Tf 1 0 0 1 56 62 Tm ('+pdfEsc('HostReceipts · Klick-Dummy – simulierte Daten, keine Steuerberatung')+') Tj ET');
+    ops.push('BT /F1 8 Tf 1 0 0 1 56 48 Tm (DSGVO: Belege EU-verschlüsselt · Originalbilder nach 90 Tagen automatisch gelöscht) Tj ET');
     ops.push('BT /F1 8 Tf 1 0 0 1 505 62 Tm (Page '+pageN+') Tj ET');
     ops.push('0.85 G 0.5 w 56 80 m 539.28 80 l S');
   }
   function txt(s,x,ty,size,font,col,align,w){
     s=pdfEsc(s); font=font||'/F1';
     let tx=x;
-    if(align){ const tw=size*0.52*String(s).length; tx=align==='r'?x-tw:align==='c'?x+(w-tw)/2:x; }
+    if(align){ const tw_=tfw(s,font)*size; tx=align==='r'?x-tw_:align==='c'?x+(w-tw_)/2:x; }
     ops.push((col?col:'0 0 0')+' rg BT '+font+' '+size+' Tf 1 0 0 1 '+tx.toFixed(1)+' '+ty.toFixed(1)+' Tm ('+s+') Tj ET');
   }
-  function fit(s,maxW,size){
+  function fit(s,maxW,size,font){
     s=String(s); const orig=s;
-    while(size*0.52*s.length>maxW && s.length>1) s=s.slice(0,-1);
+    while(tfw(s,font)*size>maxW && s.length>1) s=s.slice(0,-1);
     return s.length<orig.length ? s+'…' : s;
   }
   function need(h){ if(y-h<84) startPage(); }
   startPage();
-  txt('Tax-ready expense summary',56,y,16,'/F2'); y-=24;
-  txt('Tax year 2026 · all properties · generated '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),56,y,9,'/F1','0.42 0.44 0.48'); y-=18;
+  txt('Steuerfertige Ausgabenübersicht',56,y,16,'/F2'); y-=24;
+  txt('Steuerjahr 2026 · alle Objekte · erstellt am '+new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric'}),56,y,9,'/F1','0.42 0.44 0.48'); y-=18;
   ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=14;
   const rowH=20;
-  txt('#',56,y,9,'/F2'); txt('Vendor',74,y,9,'/F2'); txt('Amount',236,y,9,'/F2',null,'r'); txt('Type',252,y,9,'/F2'); txt('Category',316,y,9,'/F2'); txt('Property',372,y,9,'/F2'); txt('Date',474,y,9,'/F2');
+  txt('#',56,y,9,'/F2'); txt('Anbieter',70,y,9,'/F2'); txt('Betrag',240,y,9,'/F2',null,'r'); txt('Art',248,y,9,'/F2'); txt('Kategorie',312,y,9,'/F2'); txt('Objekt',400,y,9,'/F2'); txt('Datum',492,y,9,'/F2');
   y-=rowH;
   if(entries.length===0){
-    txt('No deductions logged yet — send a sample receipt in Chat.',56,y,9); y-=rowH;
+    txt('Noch keine Abzugspositionen – bitte einen Beleg im Chat erfassen.',56,y,9); y-=rowH;
   }
   entries.forEach((e,i)=>{
     need(rowH);
     if(i%2===0) ops.push('0.95 g 56 '+(y-rowH+6)+' 483.28 '+rowH+' re f');
     txt(String(i+1),56,y,9);
-    txt(fit(e.vendor,100,9),74,y,9);
-    txt(fit(fmtE(e.amount),60,9),236,y,9,'/F1',null,'r');
-    txt(fit(e.costType||'—',58,9),252,y,9);
-    txt(fit(e.category,56,9),316,y,9);
-    txt(fit(e.property,92,9),372,y,9);
-    txt('2026-08-01',474,y,9);
+    txt(fit(e.vendor,100,9),70,y,9);
+    txt(fit(fmtE(e.amount),60,9),240,y,9,'/F1',null,'r');
+    txt(fit(e.costType||'—',58,9),248,y,9);
+    txt(fit(e.category,88,9),312,y,9);
+    txt(fit(e.property,92,9),400,y,9);
+    txt('01.08.2026',492,y,9);
     y-=rowH;
   });
   need(240);
   ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=18;
   const total=entries.reduce((s,e)=>s+e.amount,0);
-  txt('Total deductible expenses · tax year 2026',56,y,13,'/F2');
-  txt(fit(fmtE(total),120,13),539.28,y,13,'/F2',null,'r'); y-=28;
-  const types=['Materials','Workforce','Traveling','Taxes'];
+  txt('Abzugsfähige Ausgaben gesamt · Steuerjahr 2026',56,y,13,'/F2');
+  txt(fit(fmtE(total),120,13,'/F2'),539.28,y,13,'/F2',null,'r'); y-=28;
+  const types=['Material','Arbeit','Fahrt','Steuern'];
   const tsum={}; types.forEach(t=>tsum[t]=0);
   entries.forEach(e=>{ tsum[e.costType]=(tsum[e.costType]||0)+e.amount; });
-  txt('By cost type',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
+  txt('Nach Kostenart',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
   types.forEach(t=>{ need(16); const pct=total?Math.round(100*tsum[t]/total):0; txt('• '+t,60,y,9); txt(fit(fmtE(tsum[t])+' ('+pct+'%)',120,9),539.28,y,9,null,null,'r'); y-=16; });
   const cats={}; entries.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);
-  txt('By category',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
+  txt('Nach Kategorie',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
   Object.entries(cats).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
   const props={}; entries.forEach(e=>{ const p=e.property.split(' · ')[0]; props[p]=(props[p]||0)+e.amount; });
-  txt('By property',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
+  txt('Nach Objekt',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
   Object.entries(props).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
   flush();
   return buildPdfFile(pages);
@@ -396,9 +399,9 @@ function doExport(){
   const pdf = makeTaxPdf(entries);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([pdfBytes(pdf)],{type:'application/pdf'}));
-  a.download = 'hostreceipts-tax-2026-demo.pdf';
+  a.download = 'hostreceipts-steuer-2026-demo.pdf';
   a.click();
-  bubble('bot','📤 <b>Export ready!</b> Tax-year summary attached (PDF, watermarked demo sample) — accountant-ready. '+(plan==='sub'?'🔒 Subscribed €79/yr: auto-logging + monthly digests active.':'🔒 €29 export pass activated.'));
+  bubble('bot','📤 <b>Export fertig!</b> Steuerjahr-Zusammenfassung als PDF angehängt (Demo-Wasserzeichen) – bereit für die Steuererklärung. '+(plan==='sub'?'🔒 Abonniert €79/Jahr: automatisches Erfassen + Monatsübersichten aktiv.':'🔒 €29-Export-Pass aktiviert.'));
   showTab('chat');
 }
 
