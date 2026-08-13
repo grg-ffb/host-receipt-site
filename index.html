@@ -134,10 +134,10 @@
     </div>
     <div class="plan" onclick="selectPlan('pass')">
       <div class="p-name"><span>One-time export</span><span class="p-price">€29</span></div>
-      <div class="p-desc">this tax season only · PDF + CSV summary</div>
+      <div class="p-desc">this tax season only · PDF summary (demo watermarked)</div>
     </div>
     <button class="btn ok" id="modalBtn" onclick="doExport()">Subscribe €79/yr</button>
-    <div style="margin-top:10px;font-size:11px;color:var(--muted)">Demo only — no payment is taken.</div>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted)">Demo only — no payment is taken · every PDF is watermarked sample content.</div>
   </div>
 </div>
 
@@ -268,17 +268,117 @@ function showTab(t){
 
 function openExport(){ document.getElementById('modal').style.display='flex'; }
 function selectPlan(p){ plan=p; document.getElementById('modalBtn').textContent = p==='sub' ? 'Subscribe €79/yr' : 'Pay €29 one-time'; }
+/* ---- PDF export (offline, hand-rolled) — demo only: PDF replaces CSV ---- */
+function pdfEsc(s){
+  s=String(s)
+    .replace(/€/g,'\u0080').replace(/•/g,'\u0095')
+    .replace(/“/g,'\u0093').replace(/”/g,'\u0094')
+    .replace(/‘/g,'\u0091').replace(/’/g,'\u0092')
+    .replace(/–/g,'\u0096').replace(/—/g,'\u0097').replace(/…/g,'\u0085');
+  s=s.replace(/[^\x00-\xFF]/g,''); // drop emoji / non-Latin1 (garbage glyphs)
+  return s.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
+}
+function pdfBytes(str){
+  const b=new Uint8Array(str.length);
+  for(let i=0;i<str.length;i++) b[i]=str.charCodeAt(i)&0xFF;
+  return b;
+}
+function buildPdfFile(streams){
+  const n=streams.length, kids=[];
+  for(let i=0;i<n;i++) kids.push((3+i)+' 0 R');
+  const F1=3+n, F2=3+n+1;
+  const objs=[null,
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+n+' >>'
+  ];
+  for(let i=0;i<n;i++)
+    objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 '+F1+' 0 R /F2 '+F2+' 0 R >> >> /Contents '+(F2+1+i)+' 0 R >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  for(let i=0;i<n;i++)
+    objs.push('<< /Length '+streams[i].length+' >>\nstream\n'+streams[i]+'\nendstream');
+  let out='%PDF-1.4\n'; const off=[0];
+  for(let i=1;i<objs.length;i++){ off[i]=out.length; out+=i+' 0 obj\n'+objs[i]+'\nendobj\n'; }
+  const xs=out.length;
+  out+='xref\n0 '+objs.length+'\n0000000000 65535 f \n';
+  for(let i=1;i<objs.length;i++) out+=String(off[i]).padStart(10,'0')+' 00000 n \n';
+  out+='trailer\n<< /Size '+objs.length+' /Root 1 0 R >>\nstartxref\n'+xs+'\n%%EOF';
+  return out;
+}
+function makeTaxPdf(entries){
+  const fmtE=n=>'€ '+n.toFixed(2).replace('.',',');
+  const WAT='SAMPLE CONTENT – FOR DEMO PURPOSES ONLY';
+  const pages=[]; let ops=[], y=0, pageN=0;
+  const headerH=92, topY=841.89-headerH-22;
+  function flush(){ if(ops.length){ pages.push(ops.join('\n')); ops=[]; } }
+  function startPage(){
+    flush(); pageN++; y=topY;
+    ops.push('0.027 0.369 0.329 rg 0 '+(841.89-headerH)+' 595.28 '+headerH+' re f');
+    ops.push('1 1 1 rg BT /F2 20 Tf 1 0 0 1 56 '+(841.89-58)+' Tm (HostReceipts) Tj ET');
+    ops.push('BT /F1 10 Tf 1 0 0 1 56 '+(841.89-76)+' Tm ('+pdfEsc('WhatsApp tax logger · tax-ready expense summary')+') Tj ET');
+    ops.push('BT /F2 30 Tf 0.9 g 0.707 0.707 -0.707 0.707 33 173 Tm ('+pdfEsc(WAT)+') Tj ET');
+    ops.push('0 0 0 rg BT /F1 8 Tf 1 0 0 1 56 62 Tm ('+pdfEsc('HostReceipts · click dummy — simulated data, not tax advice')+') Tj ET');
+    ops.push('BT /F1 8 Tf 1 0 0 1 56 48 Tm (GDPR: receipts stored encrypted in the EU · raw images auto-deleted after 90 days) Tj ET');
+    ops.push('BT /F1 8 Tf 1 0 0 1 505 62 Tm (Page '+pageN+') Tj ET');
+    ops.push('0.85 G 0.5 w 56 80 m 539.28 80 l S');
+  }
+  function txt(s,x,ty,size,font,col,align,w){
+    s=pdfEsc(s); font=font||'/F1';
+    let tx=x;
+    if(align){ const tw=size*0.52*String(s).length; tx=align==='r'?x-tw:align==='c'?x+(w-tw)/2:x; }
+    ops.push((col?col:'0 0 0')+' rg BT '+font+' '+size+' Tf 1 0 0 1 '+tx.toFixed(1)+' '+ty.toFixed(1)+' Tm ('+s+') Tj ET');
+  }
+  function fit(s,maxW,size){
+    s=String(s); const orig=s;
+    while(size*0.52*s.length>maxW && s.length>1) s=s.slice(0,-1);
+    return s.length<orig.length ? s+'…' : s;
+  }
+  function need(h){ if(y-h<84) startPage(); }
+  startPage();
+  txt('Tax-ready expense summary',56,y,16,'/F2'); y-=24;
+  txt('Tax year 2026 · all properties · generated '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),56,y,9,'/F1','0.42 0.44 0.48'); y-=18;
+  ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=14;
+  const rowH=20;
+  txt('#',56,y,9,'/F2'); txt('Vendor',78,y,9,'/F2'); txt('Amount',242,y,9,'/F2',null,'r'); txt('Category',254,y,9,'/F2'); txt('Property',336,y,9,'/F2'); txt('Date',436,y,9,'/F2'); txt('Status',489,y,9,'/F2');
+  y-=rowH;
+  if(entries.length===0){
+    txt('No deductions logged yet — send a sample receipt in Chat.',56,y,9); y-=rowH;
+  }
+  entries.forEach((e,i)=>{
+    need(rowH);
+    if(i%2===0) ops.push('0.95 g 56 '+(y-rowH+6)+' 483.28 '+rowH+' re f');
+    txt(String(i+1),56,y,9);
+    txt(fit(e.vendor,112,9),78,y,9);
+    txt(fit(fmtE(e.amount),60,9),242,y,9,'/F1',null,'r');
+    txt(fit(e.category,82,9),254,y,9);
+    txt(fit(e.property,100,9),336,y,9);
+    txt('2026-08-01',436,y,9);
+    txt('confirmed',489,y,9);
+    y-=rowH;
+  });
+  need(150);
+  ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=18;
+  const total=entries.reduce((s,e)=>s+e.amount,0);
+  txt('Total deductible expenses · tax year 2026',56,y,13,'/F2');
+  txt(fit(fmtE(total),120,13),539.28,y,13,'/F2',null,'r'); y-=28;
+  const cats={}; entries.forEach(e=>cats[e.category]=(cats[e.category]||0)+e.amount);
+  txt('By category',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
+  Object.entries(cats).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
+  const props={}; entries.forEach(e=>{ const p=e.property.split(' · ')[0]; props[p]=(props[p]||0)+e.amount; });
+  txt('By property',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
+  Object.entries(props).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
+  flush();
+  return buildPdfFile(pages);
+}
 function doExport(){
   document.getElementById('modal').style.display='none';
-  // actually generate a CSV — works offline
-  const rows = [['Vendor','Amount','Category','Property','Date','Status']];
-  entries.forEach(e=>rows.push([e.vendor, e.amount.toFixed(2), e.category, e.property, '2026-08-01', 'confirmed']));
-  const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  // generate a watermarked PDF (demo only — no CSV)
+  const pdf = makeTaxPdf(entries);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = 'hostreceipts-tax-2026.csv';
+  a.href = URL.createObjectURL(new Blob([pdfBytes(pdf)],{type:'application/pdf'}));
+  a.download = 'hostreceipts-tax-2026-demo.pdf';
   a.click();
-  bubble('bot','📤 <b>Export ready!</b> Tax-year summary attached (CSV) — accountant-ready. '+(plan==='sub'?'🔒 Subscribed €79/yr: auto-logging + monthly digests active.':'🔒 €29 export pass activated.'));
+  bubble('bot','📤 <b>Export ready!</b> Tax-year summary attached (PDF, watermarked demo sample) — accountant-ready. '+(plan==='sub'?'🔒 Subscribed €79/yr: auto-logging + monthly digests active.':'🔒 €29 export pass activated.'));
   showTab('chat');
 }
 
