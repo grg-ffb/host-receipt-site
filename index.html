@@ -133,14 +133,14 @@
     <h3>🎟️ Dateien-Paket</h3>
     <p id="modalReason">Deine kostenlosen Analysen sind aufgebraucht.</p>
     <div class="plan hot" onclick="selectPlan('pack10')">
-      <div class="p-name"><span>10 Dateien</span><span class="p-price">€19</span></div>
+      <div class="p-name"><span>10 Dateien</span><span class="p-price">€5</span></div>
       <div class="p-desc">einmalig · 10 weitere Analysen · Zusammenfassung jederzeit</div>
     </div>
     <div class="plan" onclick="selectPlan('year')">
-      <div class="p-name"><span>Unbegrenzt für 1 Jahr</span><span class="p-price">€79/Jahr</span></div>
+      <div class="p-name"><span>Unbegrenzt für 1 Jahr</span><span class="p-price">€19/Jahr</span></div>
       <div class="p-desc">unbegrenzte Analysen · alle Objekte · Zusammenfassung jederzeit</div>
     </div>
-    <button class="btn ok" id="modalBtn" onclick="confirmPlan()">10 Dateien kaufen (€19)</button>
+    <button class="btn ok" id="modalBtn" onclick="confirmPlan()">10 Dateien kaufen (€5)</button>
     <div style="margin-top:10px;font-size:11px;color:var(--muted)">Nur Demo – es wird nichts verrechnet · Zusammenfassung & PDF-Export bleiben immer kostenlos.</div>
   </div>
 </div>
@@ -309,7 +309,7 @@ function openPricing(reason){
 }
 function selectPlan(p){
   pendingPlan = p;
-  document.getElementById('modalBtn').textContent = p==='pack10' ? '10 Dateien kaufen (€19)' : 'Jahres-Flat kaufen (€79/Jahr)';
+  document.getElementById('modalBtn').textContent = p==='pack10' ? '10 Dateien kaufen (€5)' : 'Jahres-Flat kaufen (€19/Jahr)';
 }
 function confirmPlan(){
   document.getElementById('modal').style.display='none';
