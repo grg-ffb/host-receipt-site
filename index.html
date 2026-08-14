@@ -141,7 +141,7 @@
       <div class="p-desc">einmalig · 10 weitere Analysen · Zusammenfassung jederzeit</div>
     </div>
     <div class="plan" onclick="selectPlan('year')">
-      <div class="p-name"><span>Unbegrenzt für 1 Jahr</span><span class="p-price">€19/Jahr</span></div>
+      <div class="p-name"><span>Unbegrenzt für 1 Jahr</span><span class="p-price">€29/Jahr</span></div>
       <div class="p-desc">unbegrenzte Analysen · alle Objekte · Zusammenfassung jederzeit</div>
     </div>
     <button class="btn ok" id="modalBtn" onclick="confirmPlan()">10 Dateien kaufen (€5)</button>
@@ -322,7 +322,7 @@ function openPricing(reason){
 }
 function selectPlan(p){
   pendingPlan = p;
-  document.getElementById('modalBtn').textContent = p==='pack10' ? '10 Dateien kaufen (€5)' : 'Jahres-Flat kaufen (€19/Jahr)';
+  document.getElementById('modalBtn').textContent = p==='pack10' ? '10 Dateien kaufen (€5)' : 'Jahres-Flat kaufen (€29/Jahr)';
 }
 function confirmPlan(){
   document.getElementById('modal').style.display='none';
