@@ -1,468 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HostReceipts — WhatsApp Steuer-Logger (Demo)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="myZettelbox erfasst Rechnungen und Belege direkt über WhatsApp: Foto oder PDF senden, Daten prüfen, bestätigen und später als Übersicht exportieren. Early Access bis Ende 2026.">
+<title>myZettelbox – Belege einfach per WhatsApp erfassen</title>
 <style>
-  :root{--wa:#075e54;--wa2:#128c7e;--wa3:#25d366;--bg:#e5ddd5;--bubble:#fff;--bubble2:#dcf8c6;--ink:#1a1f2e;--muted:#6b7280;--accent:#f59e0b;}
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f3f4f6;color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;}
-  .topbar{background:var(--wa);color:#fff;width:100%;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
-  .topbar .logo{font-weight:800;} .topbar .logo span{opacity:.8;font-weight:500;}
-  .topbar .live{font-size:11px;background:var(--wa3);color:#054d33;font-weight:700;padding:3px 10px;border-radius:999px;}
-  .phone{width:100%;max-width:430px;margin:20px auto 10px;background:var(--bg);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.15);overflow:hidden;border:1px solid #d1c7bd;}
-  .ph-head{background:var(--wa2);color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px;}
-  .avatar{width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;}
-  .ph-head .name{font-weight:700;font-size:15px;}
-  .ph-head .status{font-size:11px;opacity:.85;}
-  .tabs{display:flex;background:var(--wa2);}
-  .tab{flex:1;text-align:center;padding:10px;color:#d9f4ef;font-weight:700;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;}
-  .tab.active{color:#fff;border-bottom-color:var(--wa3);}
-  .chat{padding:14px 12px;min-height:520px;max-height:560px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;}
-  .msg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:14px;line-height:1.45;position:relative;box-shadow:0 1px 1px rgba(0,0,0,.08);}
-  .msg.bot{background:var(--bubble);align-self:flex-start;border-top-left-radius:3px;}
-  .msg.user{background:var(--bubble2);align-self:flex-end;border-top-right-radius:3px;}
-  .msg .time{display:block;font-size:10px;color:#a0a0a0;text-align:right;margin-top:4px;}
-  .chip{display:inline-block;background:var(--wa2);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;margin:6px 6px 0 0;border:none;}
-  .chip:hover{background:var(--wa);}
-  .typing{display:inline-flex;gap:4px;padding:12px 14px;}
-  .typing span{width:7px;height:7px;background:#b0b0b0;border-radius:50%;animation:blink 1.2s infinite;}
-  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
-  @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
-  .parse-card{background:#fdf9ef;border:1px solid #f0e2c0;border-radius:12px;padding:12px;margin-top:8px;}
-  .parse-card h4{font-size:13px;color:#7c5e10;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-  .conf{font-size:11px;background:var(--wa3);color:#054d33;border-radius:999px;padding:2px 8px;font-weight:700;}
-  .parse-card .kv{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px dashed #eee;}
-  .parse-card .kv:last-of-type{border-bottom:none;}
-  .parse-card .kv b{font-weight:700;}
-  .flag{display:inline-block;background:var(--accent);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;margin-top:8px;}
-  .confirm-row{display:flex;gap:8px;margin-top:10px;}
-  .btn{flex:1;border:none;border-radius:9px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;}
-  .btn.ok{background:var(--wa3);color:#054d33;} .btn.ok:hover{background:#1fbd5d;color:#fff;}
-  .btn.edit{background:#fff;color:var(--ink);border:1px solid #ddd;}
-  .edit-form{background:#fff;border:1px solid #ddd;border-radius:12px;padding:10px;margin-top:8px;display:flex;flex-direction:column;gap:8px;}
-  .edit-form input,.edit-form select{padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;width:100%;}
-  .summary{padding:14px 12px;display:none;}
-  .s-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-  .s-card h3{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:8px;}
-  .total{font-size:30px;font-weight:900;color:var(--wa);}
-  .cat{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;border-bottom:1px solid #f3f3f3;}
-  .cat:last-child{border-bottom:none;}
-  .cat .amt{font-weight:700;font-variant-numeric:tabular-nums;}
-  .export-btn{width:100%;background:var(--wa);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;margin-top:6px;}
-  .export-btn:hover{background:var(--wa2);}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;}
-  .modal-inner{background:#fff;border-radius:16px;padding:22px;max-width:380px;width:100%;text-align:center;}
-  .modal-inner h3{font-size:18px;margin-bottom:6px;}
-  .modal-inner p{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
-  .plan{border:2px solid #eee;border-radius:12px;padding:14px;margin-bottom:10px;text-align:left;cursor:pointer;}
-  .plan:hover,.plan.hot{border-color:var(--wa);}
-  .plan .p-name{font-weight:800;font-size:14px;display:flex;justify-content:space-between;}
-  .plan .p-price{color:var(--wa);font-weight:900;}
-  .plan .p-desc{font-size:12px;color:var(--muted);margin-top:3px;}
-  .modal .btn{width:100%;padding:12px;font-size:14px;}
-  .foot{max-width:430px;width:100%;padding:0 16px 30px;font-size:11px;color:var(--muted);text-align:center;line-height:1.6;}
-  .foot a{color:var(--wa);font-weight:700;text-decoration:none;}
-  .attach{position:sticky;bottom:0;background:var(--bg);padding:10px 12px;display:flex;gap:8px;align-items:center;}
-  .attach input[type=file]{display:none;}
-  .attach label{background:#fff;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;border:1px solid #ddd;}
-  .attach .fake-input{flex:1;background:#fff;border-radius:999px;padding:10px 14px;font-size:13px;color:#a0a0a0;border:1px solid #ddd;}
-  .empty-note{font-size:12px;color:var(--muted);text-align:center;padding:20px;}
-  .gdpr{font-size:10px;color:var(--muted);text-align:center;margin-top:10px;}
+:root{--ink:#17221d;--muted:#617068;--paper:#fbfaf6;--card:#fff;--green:#1f6f54;--green2:#e4f3eb;--line:#dfe7e2;--warm:#f2b66d}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--paper);color:var(--ink);line-height:1.55}
+.wrap{width:min(1080px,calc(100% - 40px));margin:auto}nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:22px;font-weight:850;letter-spacing:-.5px}.brand span{color:var(--green)}nav a{color:var(--ink);text-decoration:none;font-weight:700;font-size:14px}
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:70px;align-items:center;padding:72px 0 92px}.eyebrow{display:inline-block;background:var(--green2);color:var(--green);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800}h1{font-size:clamp(44px,6vw,72px);line-height:1.02;letter-spacing:-3px;margin:20px 0 22px;max-width:760px}.lead{font-size:20px;color:var(--muted);max-width:650px}.actions{display:flex;gap:12px;align-items:center;margin-top:32px;flex-wrap:wrap}.btn{display:inline-block;padding:14px 20px;border-radius:12px;background:var(--green);color:white;text-decoration:none;font-weight:800;border:1px solid var(--green)}.btn.secondary{background:transparent;color:var(--green)}.micro{font-size:13px;color:var(--muted);margin-top:14px}
+.phone{background:#e8e3da;border:9px solid #202622;border-radius:34px;padding:0 12px 18px;box-shadow:0 30px 70px #193c2b26;max-width:390px;margin:auto;overflow:hidden}.phonehead{background:var(--green);color:#fff;margin:0 -12px 14px;padding:17px 18px;font-weight:800}.bubble{background:#fff;padding:11px 13px;border-radius:12px;margin:9px 0;width:88%;font-size:14px;box-shadow:0 1px 2px #0001}.bubble.me{background:#d9f6cb;margin-left:auto}.receipt{font-size:13px}.ok{color:var(--green);font-weight:800}
+section{padding:84px 0}section.alt{background:#f1f5f1}.sectionhead{max-width:700px;margin-bottom:38px}.sectionhead h2{font-size:38px;letter-spacing:-1.5px;margin:0 0 10px}.sectionhead p{color:var(--muted);font-size:18px}.steps,.features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:25px}.num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--green2);color:var(--green);font-weight:900}.card h3{margin:16px 0 8px}.card p{color:var(--muted);margin:0}.early{background:var(--ink);color:white;border-radius:28px;padding:46px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center}.early h2{font-size:36px;letter-spacing:-1px;margin:0 0 10px}.early p{color:#cbd6d0;margin:0;max-width:650px}.early .btn{background:#fff;color:var(--ink);border-color:#fff}.fine{font-size:13px;color:var(--muted);max-width:800px;margin-top:24px}footer{padding:35px 0 55px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+@media(max-width:800px){.hero{grid-template-columns:1fr;gap:45px;padding-top:45px}h1{letter-spacing:-2px}.steps,.features{grid-template-columns:1fr}.early{grid-template-columns:1fr;padding:30px}.phone{max-width:360px}section{padding:62px 0}}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="logo">🧾 HostReceipts <span>· WhatsApp Steuer-Logger</span></div>
-  <div class="live">● Klick-Dummy</div>
+<div class="wrap"><nav><div class="brand">my<span>Zettelbox</span></div><a href="#early">Early Access</a></nav></div>
+<main>
+<div class="wrap hero">
+<div>
+<span class="eyebrow">Early Access · kostenlos bis 31.12.2026</span>
+<h1>Belege rein.<br>Zettelchaos raus.</h1>
+<p class="lead">Schick Rechnungen und Belege einfach per WhatsApp an myZettelbox. Foto oder PDF genügt – die wichtigsten Daten werden erkannt, du prüfst sie kurz und bestätigst.</p>
+<div class="actions"><a class="btn" href="#early">Early Access anfragen</a><a class="btn secondary" href="#how">So funktioniert's</a></div>
+<p class="micro">Für Vermieter und Gastgeber im DACH-Raum · aktuell in früher Testphase</p>
+</div>
+<div class="phone" aria-label="Beispiel einer myZettelbox WhatsApp Unterhaltung">
+<div class="phonehead">🧾 myZettelbox</div>
+<div class="bubble me">📎 Rechnung_Stadtwerke.pdf</div>
+<div class="bubble receipt">🧾 <b>Beleg erkannt</b><br>Stadtwerke München<br>📅 12.09.2026<br>💰 84,20 EUR<br>🗂️ Strom, Gas &amp; Wasser</div>
+<div class="bubble me">✅ Bestätigen</div>
+<div class="bubble"><span class="ok">✓ Erfasst.</span> Der Beleg ist deiner Zettelbox zugeordnet.</div>
+</div>
 </div>
 
-<div class="phone">
-  <div class="ph-head">
-    <div class="avatar">🧾</div>
-    <div>
-      <div class="name">HostReceipts Bot</div>
-      <div class="status">online · WhatsApp Business</div>
-    </div>
-  </div>
-  <div class="tabs">
-    <div class="tab active" id="tabChat" onclick="showTab('chat')">💬 Chat</div>
-    <div class="tab" id="tabSum" onclick="showTab('summary')">📊 Zusammenfassung</div>
-  </div>
-
-  <!-- CHAT -->
-  <div class="chat" id="chat"></div>
-  <div class="attach">
-    <label for="fileInput" title="Send a receipt photo">📎</label>
-    <input type="file" id="fileInput" accept="image/*" onchange="sendUploaded(this)">
-    <div class="fake-input">Nachricht… (Beleg antippen oder 📎)</div>
-  </div>
-
-  <!-- SUMMARY -->
-  <div class="summary" id="summary">
-    <div class="s-card">
-      <h3>Steuerjahr 2026 · alle Objekte</h3>
-      <div class="total" id="sumTotal">€0.00</div>
-      <div style="font-size:12px;color:var(--muted)">erfasste Ausgaben gesamt</div>
-    </div>
-    <div class="s-card">
-      <h3>Kontingent</h3>
-      <div id="sumQuota"></div>
-    </div>
-    <div class="s-card">
-      <h3>Nach Kostenart</h3>
-      <div id="sumTypes"></div>
-    </div>
-    <div class="s-card">
-      <h3>Nach Kategorie</h3>
-      <div id="sumCats"></div>
-    </div>
-    <div class="s-card">
-      <h3>Nach Objekt</h3>
-      <div id="sumProps"></div>
-    </div>
-    <button class="export-btn" onclick="doExport()">📤 Übersicht als PDF exportieren</button>
-    <div class="gdpr">DSGVO: Belege EU-verschlüsselt gespeichert · Originalbilder nach 90 Tagen automatisch gelöscht</div>
-  </div>
+<section class="alt" id="how"><div class="wrap">
+<div class="sectionhead"><h2>In drei Schritten erledigt.</h2><p>Keine neue App, kein kompliziertes Formular. myZettelbox nutzt den Kanal, den du ohnehin auf dem Handy hast.</p></div>
+<div class="steps">
+<div class="card"><div class="num">1</div><h3>Beleg senden</h3><p>Fotografiere den Beleg oder sende eine PDF-Rechnung direkt über WhatsApp.</p></div>
+<div class="card"><div class="num">2</div><h3>Erkennung prüfen</h3><p>myZettelbox liest unter anderem Anbieter, Datum, Betrag und Kategorie aus. Fehler kannst du vor dem Speichern korrigieren.</p></div>
+<div class="card"><div class="num">3</div><h3>Bestätigen &amp; sammeln</h3><p>Bestätigte Ausgaben landen strukturiert in deiner Zettelbox. Zusammenfassung und CSV-Export helfen bei der späteren Aufbereitung.</p></div>
 </div>
+</div></section>
 
-<div class="foot">
-  Klick-Dummy – es wird nichts echt geparst oder verrechnet. Ablauf: Foto rein → KI erfasst → mit einem Tipp bestätigen. Keine Steuerberatung – ob etwas absetzbar ist, klärt deine Steuerberatung.
+<section><div class="wrap">
+<div class="sectionhead"><h2>Gebaut für den Alltag.</h2><p>Der Early Access konzentriert sich bewusst auf einen einfachen Kern: Belege schnell erfassen, statt sie bis zur Steuerzeit zu sammeln.</p></div>
+<div class="features">
+<div class="card"><h3>📷 Foto &amp; PDF</h3><p>Rechnungen aus Papier und digitale Dokumente können direkt verarbeitet werden.</p></div>
+<div class="card"><h3>✏️ Kontrolle bleibt bei dir</h3><p>Die automatische Erkennung ist eine Hilfe. Vor dem Erfassen kannst du Werte und Kategorie prüfen und korrigieren.</p></div>
+<div class="card"><h3>📊 Übersicht &amp; Export</h3><p>Bestätigte Belege lassen sich nach Steuerjahr zusammenfassen und als CSV exportieren.</p></div>
 </div>
+<p class="fine">myZettelbox befindet sich im Early Access und ist keine Steuerberatung. Die automatische Erkennung kann Fehler machen. Bitte prüfe die erfassten Angaben; die steuerliche Behandlung deiner Ausgaben solltest du bei Bedarf mit deiner Steuerberatung klären.</p>
+</div></section>
 
-<!-- PRICING MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-inner">
-    <h3>🎟️ Dateien-Paket</h3>
-    <p id="modalReason">Deine kostenlosen Analysen sind aufgebraucht.</p>
-    <div class="plan hot" onclick="selectPlan('pack10')">
-      <div class="p-name"><span>10 Dateien</span><span class="p-price">€5</span></div>
-      <div class="p-desc">einmalig · 10 weitere Analysen · Zusammenfassung jederzeit</div>
-    </div>
-    <div class="plan" onclick="selectPlan('year')">
-      <div class="p-name"><span>Unbegrenzt für 1 Jahr</span><span class="p-price">€29/Jahr</span></div>
-      <div class="p-desc">unbegrenzte Analysen · alle Objekte · Zusammenfassung jederzeit</div>
-    </div>
-    <button class="btn ok" id="modalBtn" onclick="confirmPlan()">10 Dateien kaufen (€5)</button>
-    <div style="margin-top:10px;font-size:11px;color:var(--muted)">Nur Demo – es wird nichts verrechnet · Zusammenfassung & PDF-Export bleiben immer kostenlos.</div>
-  </div>
+<section id="early"><div class="wrap">
+<div class="early">
+<div><h2>Werde Early-Access-Tester.</h2><p>Wir suchen die ersten Gastgeber und Vermieter, die myZettelbox mit echten Belegen im Alltag testen und uns sagen, was noch fehlt. Die Nutzung im Early Access ist bis 31. Dezember 2026 kostenlos.</p></div>
+<a class="btn" href="mailto:hello@myzettelbox.de?subject=myZettelbox%20Early%20Access">Early Access anfragen</a>
 </div>
-
-<script>
-const chat = document.getElementById('chat');
-const entries = [];  // {vendor, amount, date, category, property, confidence, flagged}
-let lastConfirmed = null;
-let plan = 'free';           // 'free' | 'pack10' | 'year'
-const FREE_ANALYSES = 7;
-let analysesUsed = 0;        // kostenlose Analysen verbraucht
-let packLeft = 0;            // verbleibende Dateien im 10er-Paket
-let pendingSend = null;      // Sendevorgang, der nach dem Kauf fortgesetzt wird
-let pendingPlan = 'pack10';
-
-const KATEGORIEN=['Strom/Energie ⚡','Reparatur 🔧','Reinigung 🧹','Verbrauchsmaterial 🧻','Fahrt/Tanken 🚗','Möbel/Ausstattung 🛋','Abgaben 📄'];
-const KOSTENARTEN=['Material','Arbeit','Fahrt','Steuern'];
-
-const SAMPLES = [
-  {name:'Stromrechnung', file:'IMG_2841.jpg', vendor:'Wien Energie', amount:214.60, category:'Strom/Energie ⚡', costType:'Material', property:'Wohnung 12 · Wien', flagged:'Sommer-AC-Spitze 🔎', confidence:96},
-  {name:'Handwerker-Rechnung', file:'IMG_2903.jpg', vendor:'Hausmeister Müller', amount:180.00, category:'Reparatur 🔧', costType:'Arbeit', property:'Wohnung 12 · Wien', flagged:'', confidence:91},
-  {name:'Reinigungsservice', file:'IMG_2911.jpg', vendor:'Putztruppe Wien', amount:45.00, category:'Reinigung 🧹', costType:'Arbeit', property:'Studio 4 · Graz', flagged:'', confidence:98},
-  {name:'Tankstelle & Maut', file:'IMG_2955.jpg', vendor:'ÖAMTC Tankstelle', amount:32.50, category:'Fahrt/Tanken 🚗', costType:'Fahrt', property:'Wohnung 12 · Wien', flagged:'', confidence:94},
-  {name:'Grundsteuer', file:'IMG_2988.jpg', vendor:'Magistrat Wien', amount:58.00, category:'Abgaben 📄', costType:'Steuern', property:'Studio 4 · Graz', flagged:'', confidence:99},
-  {name:'Möbel (IKEA)', file:'IMG_3012.jpg', vendor:'IKEA Wien', amount:129.00, category:'Möbel/Ausstattung 🛋', costType:'Material', property:'Studio 4 · Graz', flagged:'', confidence:97},
-];
-
-function bubble(cls, html){ 
-  const d = document.createElement('div');
-  d.className = 'msg ' + cls;
-  d.innerHTML = html + '<span class="time">14:0' + Math.floor(Math.random()*9) + '</span>';
-  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
-  return d;
-}
-function typingBubble(){
-  const d = document.createElement('div');
-  d.className = 'msg bot typing';
-  d.innerHTML = '<span></span><span></span><span></span>';
-  chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
-  return d;
-}
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-async function init(){
-  bubble('bot','👋 Hallo! Ich bin der HostReceipts-Bot. Schick mir einen Beleg oder eine Betriebskosten-Rechnung und ich erfasse ihn sauber für dein Objekt. Die ersten <b>'+FREE_ANALYSES+' Analysen sind kostenlos</b> – danach brauchst du ein Dateien-Paket. Probier\'s aus!');
-  bubble('bot','Tippe einen Beispielbeleg zum Senden an – oder nutze 📎 mit einem echten Foto (Erkennung ist im Dummy simuliert):');
-  const row = document.createElement('div');
-  SAMPLES.forEach((s,i)=> { const c = document.createElement('button'); c.className='chip'; c.textContent=s.name; c.onclick=()=>sendSample(i); row.appendChild(c); });
-  chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
-}
-
-function canAnalyze(){
-  if(plan==='year') return true;
-  if(plan==='pack10') return packLeft>0;
-  return analysesUsed < FREE_ANALYSES;
-}
-function quotaNote(){
-  if(plan==='year') return 'Jahres-Flat – unbegrenzte Analysen';
-  if(plan==='pack10') return 'Dateien-Paket: <b>'+packLeft+'/10</b> verbleibend';
-  return 'Kostenlose Analyse <b>'+analysesUsed+'/'+FREE_ANALYSES+'</b>';
-}
-function checkQuota(action){
-  if(canAnalyze()) return true;
-  pendingSend = action;
-  openPricing(plan==='pack10' ? 'Dein 10-Dateien-Paket ist aufgebraucht – verlängere oder wechsle auf die Jahres-Flat.'
-                              : 'Deine '+FREE_ANALYSES+' kostenlosen Analysen sind aufgebraucht – sichere dir ein Dateien-Paket.');
-  return false;
-}
-async function sendSample(i){
-  const s = SAMPLES[i];
-  if(!checkQuota(()=>sendSample(i))) return;
-  bubble('user','📷 Beleg wird gesendet… <b>'+s.file+'</b>');
-  const t = typingBubble();
-  await sleep(900); t.remove();
-  await parseCard(s.vendor, s.amount, s.category, s.costType, s.property, s.flagged, s.confidence, s.file);
-}
-
-async function sendUploaded(input){
-  const f = input.files[0]; if(!f) return;
-  if(!checkQuota(()=>sendUploaded(input))) return;
-  bubble('user','📷 Beleg wird gesendet… <b>'+f.name+'</b>');
-  const t = typingBubble();
-  await sleep(1200); t.remove();
-  // simulated parse — deterministic pick from samples
-  const s = SAMPLES[Math.floor(Math.random()*SAMPLES.length)];
-  await parseCard(s.vendor, s.amount, s.category, s.costType, s.property, s.flagged, s.confidence, f.name);
-  input.value = '';
-}
-
-async function parseCard(vendor, amount, category, costType, property, flagged, confidence, file){
-  bubble('bot','Erfasse Beleg… einen Moment 🔎');
-  await sleep(700);
-  const card = bubble('bot','<div class="parse-card" id="parseCard"><h4>Erfasst · '+file+' <span class="conf">'+confidence+'% Konfidenz</span></h4>'+
-    '<div class="kv"><span>Anbieter</span><b>'+vendor+'</b></div>'+
-    '<div class="kv"><span>Betrag</span><b>€'+amount.toFixed(2)+'</b></div>'+
-    '<div class="kv"><span>Datum</span><b>01.08.2026</b></div>'+
-    '<div class="kv"><span>Kategorie</span><b>'+category+'</b></div>'+
-    '<div class="kv"><span>Kostenart</span><b>'+costType+'</b></div>'+
-    '<div class="kv"><span>Objekt</span><b>'+property+'</b></div>'+
-    (flagged?'<div class="flag">'+flagged+'</div>':'')+
-    '<div class="confirm-row"><button class="btn ok" onclick="confirmLog()">✅ Bestätigen</button><button class="btn edit" onclick="editCard()">✏️ Korrigieren</button></div></div>');
-  lastConfirmed = {vendor, amount, category, costType, property, flagged, confidence, el: card};
-}
-
-function editCard(){
-  const p = lastConfirmed.el.querySelector('.parse-card');
-  p.querySelector('.confirm-row').remove();
-  const f = document.createElement('div');
-  f.className = 'edit-form';
-  f.innerHTML = '<input id="edAmt" type="number" step="0.01" value="'+lastConfirmed.amount+'"><select id="edCat">'+
-    KATEGORIEN.map(c=>'<option'+(c===lastConfirmed.category?' selected':'')+'>'+c+'</option>').join('')+
-    '</select><select id="edType">'+
-    KOSTENARTEN.map(t=>'<option'+(t===lastConfirmed.costType?' selected':'')+'>'+t+'</option>').join('')+
-    '</select><button class="btn ok" onclick="saveEdit()">✅ Speichern & erfassen</button>';
-  p.appendChild(f);
-}
-
-function saveEdit(){
-  lastConfirmed.amount = parseFloat(document.getElementById('edAmt').value)||0;
-  lastConfirmed.category = document.getElementById('edCat').value;
-  lastConfirmed.costType = document.getElementById('edType').value;
-  logEntry();
-}
-
-function confirmLog(){ logEntry(); }
-
-function logEntry(){
-  const e = lastConfirmed; if(!e) return;
-  entries.push({vendor:e.vendor, amount:e.amount, category:e.category, costType:e.costType, property:e.property, flagged:e.flagged});
-  if(plan==='free') analysesUsed++;
-  if(plan==='pack10') packLeft--;
-  e.el.remove(); lastConfirmed = null;
-  bubble('bot','✅ <b>Erfasst!</b> €'+e.amount.toFixed(2)+' · '+e.category+' · '+e.property.replace(' · Wien','').replace(' · Graz',''));
-  const month = entries.reduce((s,x)=>s+x.amount,0);
-  bubble('bot','Diesen Monat: <b>€'+month.toFixed(2)+'</b> erfasste Ausgaben über deine Objekte. 💰 <button class="chip" onclick="showTab(\'summary\')">Monatsübersicht ansehen</button>');
-  if(plan!=='year') bubble('bot','🎟️ '+quotaNote());
-  if(plan==='free' && analysesUsed===FREE_ANALYSES) bubble('bot','Das war deine letzte kostenlose Analyse – für weitere Belege brauchst du ein Dateien-Paket. 📦');
-  renderSummary();
-}
-
-function renderSummary(){
-  const fmt = n => '€' + n.toLocaleString('de-DE',{minimumFractionDigits:2, maximumFractionDigits:2});
-  const total = entries.reduce((s,x)=>s+x.amount,0);
-  document.getElementById('sumTotal').textContent = fmt(total);
-  const tsum = {}; KOSTENARTEN.forEach(t=>tsum[t]=0);
-  entries.forEach(e => tsum[e.costType] = (tsum[e.costType]||0) + e.amount);
-  document.getElementById('sumTypes').innerHTML = KOSTENARTEN.map(t=>
-    '<div class="cat"><span>'+t+'</span><span class="amt">'+fmt(tsum[t])+'</span></div>').join('');
-  document.getElementById('sumQuota').innerHTML =
-    '<div class="cat"><span>🎟️ '+(plan==='year'?'Unbegrenzt (Jahres-Flat)':plan==='pack10'?'Dateien-Paket verbleibend':'Kostenlose Analysen')+'</span><span class="amt">'+(plan==='year'?'∞':plan==='pack10'?packLeft+'/10':analysesUsed+'/'+FREE_ANALYSES)+'</span></div>';
-  const cats = {};
-  entries.forEach(e => cats[e.category] = (cats[e.category]||0) + e.amount);
-  document.getElementById('sumCats').innerHTML = Object.entries(cats).map(([k,v])=>
-    '<div class="cat"><span>'+k+'</span><span class="amt">'+fmt(v)+'</span></div>').join('') ||
-    '<div class="empty-note">Noch keine Ausgaben erfasst – geh in den Chat 📸</div>';
-  const props = {};
-  entries.forEach(e => { const p = e.property.split(' · ')[0]; props[p] = (props[p]||0) + e.amount; });
-  document.getElementById('sumProps').innerHTML = Object.entries(props).map(([k,v])=>
-    '<div class="cat"><span>🏠 '+k+'</span><span class="amt">'+fmt(v)+'</span></div>').join('') ||
-    '<div class="empty-note">—</div>';
-}
-
-function showTab(t){
-  document.getElementById('tabChat').classList.toggle('active', t==='chat');
-  document.getElementById('tabSum').classList.toggle('active', t==='summary');
-  document.getElementById('chat').style.display = t==='chat' ? 'flex' : 'none';
-  document.querySelector('.attach').style.display = t==='chat' ? 'flex' : 'none';
-  document.getElementById('summary').style.display = t==='summary' ? 'block' : 'none';
-  renderSummary();
-}
-
-function openPricing(reason){
-  document.getElementById('modalReason').textContent = reason;
-  document.getElementById('modal').style.display='flex';
-}
-function selectPlan(p){
-  pendingPlan = p;
-  document.getElementById('modalBtn').textContent = p==='pack10' ? '10 Dateien kaufen (€5)' : 'Jahres-Flat kaufen (€29/Jahr)';
-}
-function confirmPlan(){
-  document.getElementById('modal').style.display='none';
-  plan = pendingPlan;
-  if(plan==='pack10') packLeft = 10;
-  bubble('bot','🎉 <b>Danke!</b> '+(plan==='pack10'?'10-Dateien-Paket aktiv – du kannst weiter Belege senden.':'Jahres-Flat aktiv – unbegrenzte Analysen für ein Jahr.')+' (Demo – es wird nichts verrechnet.)');
-  renderSummary();
-  if(pendingSend){ const fn=pendingSend; pendingSend=null; fn(); }
-}
-/* ---- PDF export (offline, hand-rolled) — demo only: PDF replaces CSV ---- */
-function pdfEsc(s){
-  s=String(s)
-    .replace(/€/g,'\u0080').replace(/•/g,'\u0095')
-    .replace(/“/g,'\u0093').replace(/”/g,'\u0094')
-    .replace(/‘/g,'\u0091').replace(/’/g,'\u0092')
-    .replace(/–/g,'\u0096').replace(/—/g,'\u0097').replace(/…/g,'\u0085');
-  s=s.replace(/[^\x00-\xFF]/g,''); // drop emoji / non-Latin1 (garbage glyphs)
-  return s.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
-}
-function pdfBytes(str){
-  const b=new Uint8Array(str.length);
-  for(let i=0;i<str.length;i++) b[i]=str.charCodeAt(i)&0xFF;
-  return b;
-}
-function buildPdfFile(streams){
-  const n=streams.length, kids=[];
-  for(let i=0;i<n;i++) kids.push((3+i)+' 0 R');
-  const F1=3+n, F2=3+n+1;
-  const objs=[null,
-    '<< /Type /Catalog /Pages 2 0 R >>',
-    '<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+n+' >>'
-  ];
-  for(let i=0;i<n;i++)
-    objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 '+F1+' 0 R /F2 '+F2+' 0 R >> >> /Contents '+(F2+1+i)+' 0 R >>');
-  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
-  objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
-  for(let i=0;i<n;i++)
-    objs.push('<< /Length '+streams[i].length+' >>\nstream\n'+streams[i]+'\nendstream');
-  let out='%PDF-1.4\n'; const off=[0];
-  for(let i=1;i<objs.length;i++){ off[i]=out.length; out+=i+' 0 obj\n'+objs[i]+'\nendobj\n'; }
-  const xs=out.length;
-  out+='xref\n0 '+objs.length+'\n0000000000 65535 f \n';
-  for(let i=1;i<objs.length;i++) out+=String(off[i]).padStart(10,'0')+' 00000 n \n';
-  out+='trailer\n<< /Size '+objs.length+' /Root 1 0 R >>\nstartxref\n'+xs+'\n%%EOF';
-  return out;
-}
-/* Helvetica (WinAnsi) advance widths in 1/1000 em — exact column fitting */
-const HELV={' ':278,'!':278,'"':355,'#':556,'$':556,'%':889,'&':667,"'":191,'(':333,')':333,'*':389,'+':584,',':278,'-':333,'.':278,'/':278,'0':556,'1':556,'2':556,'3':556,'4':556,'5':556,'6':556,'7':556,'8':556,'9':556,':':278,';':278,'<':584,'=':584,'>':584,'?':556,'@':1015,'A':667,'B':667,'C':722,'D':722,'E':667,'F':611,'G':778,'H':722,'I':278,'J':500,'K':667,'L':556,'M':833,'N':722,'O':778,'P':667,'Q':778,'R':722,'S':667,'T':611,'U':722,'V':667,'W':944,'X':667,'Y':667,'Z':611,'[':278,'\\':278,']':278,'^':469,'_':556,'`':333,'a':556,'b':556,'c':500,'d':556,'e':556,'f':278,'g':556,'h':556,'i':222,'j':222,'k':500,'l':222,'m':833,'n':556,'o':556,'p':556,'q':556,'r':333,'s':500,'t':278,'u':556,'v':500,'w':722,'x':500,'y':500,'z':500,'{':334,'|':260,'}':334,'~':584,'\u0080':556,'\u0095':350,'\u0096':556,'\u0097':1000,'\u0085':1000,'\u0091':222,'\u0092':222,'\u0093':333,'\u0094':333,'\u00B7':278,'\u00FC':556,'\u00F6':556,'\u00E4':556,'\u00DF':556,'\u00DC':722,'\u00D6':778,'\u00C4':667};
-function tfw(s,font){ let w=0; for(const ch of String(s)) w+=HELV[ch]||556; return w/1000*(font==='/F2'?1.05:1); }
-function makeTaxPdf(entries){
-  const fmtE=n=>'€ '+n.toFixed(2).replace('.',',');
-  const WAT='MUSTERINHALT – NUR FÜR DEMOZWECKE';
-  const pages=[]; let ops=[], y=0, pageN=0;
-  const headerH=92, topY=841.89-headerH-22;
-  function flush(){ if(ops.length){ pages.push(ops.join('\n')); ops=[]; } }
-  function startPage(){
-    flush(); pageN++; y=topY;
-    ops.push('0.027 0.369 0.329 rg 0 '+(841.89-headerH)+' 595.28 '+headerH+' re f');
-    ops.push('1 1 1 rg BT /F2 20 Tf 1 0 0 1 56 '+(841.89-58)+' Tm (HostReceipts) Tj ET');
-    ops.push('BT /F1 10 Tf 1 0 0 1 56 '+(841.89-76)+' Tm ('+pdfEsc('WhatsApp Steuer-Logger · Ausgabenübersicht')+') Tj ET');
-    ops.push('BT /F2 26 Tf 0.9 g 0.707 0.707 -0.707 0.707 66 212 Tm ('+pdfEsc(WAT)+') Tj ET');
-    ops.push('0 0 0 rg BT /F1 8 Tf 1 0 0 1 56 62 Tm ('+pdfEsc('HostReceipts · Klick-Dummy – simulierte Daten, keine Steuerberatung')+') Tj ET');
-    ops.push('BT /F1 8 Tf 1 0 0 1 56 48 Tm (DSGVO: Belege EU-verschlüsselt · Originalbilder nach 90 Tagen automatisch gelöscht) Tj ET');
-    ops.push('BT /F1 8 Tf 1 0 0 1 505 62 Tm (Page '+pageN+') Tj ET');
-    ops.push('0.85 G 0.5 w 56 80 m 539.28 80 l S');
-  }
-  function txt(s,x,ty,size,font,col,align,w){
-    s=pdfEsc(s); font=font||'/F1';
-    let tx=x;
-    if(align){ const tw_=tfw(s,font)*size; tx=align==='r'?x-tw_:align==='c'?x+(w-tw_)/2:x; }
-    ops.push((col?col:'0 0 0')+' rg BT '+font+' '+size+' Tf 1 0 0 1 '+tx.toFixed(1)+' '+ty.toFixed(1)+' Tm ('+s+') Tj ET');
-  }
-  function fit(s,maxW,size,font){
-    s=String(s); const orig=s;
-    while(tfw(s,font)*size>maxW && s.length>1) s=s.slice(0,-1);
-    return s.length<orig.length ? s+'…' : s;
-  }
-  function need(h){ if(y-h<84) startPage(); }
-  startPage();
-  txt('Ausgabenübersicht',56,y,16,'/F2'); y-=24;
-  txt('Steuerjahr 2026 · alle Objekte · erstellt am '+new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'numeric'}),56,y,9,'/F1','0.42 0.44 0.48'); y-=18;
-  ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=14;
-  const rowH=20;
-  txt('#',56,y,9,'/F2'); txt('Anbieter',70,y,9,'/F2'); txt('Datum',178,y,9,'/F2'); txt('Material',310,y,9,'/F2',null,'r'); txt('Arbeit',375,y,9,'/F2',null,'r'); txt('Fahrt',440,y,9,'/F2',null,'r'); txt('Steuern',505,y,9,'/F2',null,'r');
-  y-=rowH;
-  if(entries.length===0){
-    txt('Noch keine Ausgaben erfasst – bitte einen Beleg im Chat erfassen.',56,y,9); y-=rowH;
-  }
-  const tsum={Material:0,Arbeit:0,Fahrt:0,Steuern:0};
-  entries.forEach((e,i)=>{
-    need(rowH);
-    if(i%2===0) ops.push('0.95 g 56 '+(y-rowH+6)+' 483.28 '+rowH+' re f');
-    const t = e.costType||'Material';
-    tsum[t] = (tsum[t]||0) + e.amount;
-    txt(String(i+1),56,y,9);
-    txt(fit(e.vendor,100,9),70,y,9);
-    txt('01.08.2026',178,y,9);
-    txt(t==='Material'?fmtE(e.amount):'—',310,y,9,'/F1',null,'r');
-    txt(t==='Arbeit'?fmtE(e.amount):'—',375,y,9,'/F1',null,'r');
-    txt(t==='Fahrt'?fmtE(e.amount):'—',440,y,9,'/F1',null,'r');
-    txt(t==='Steuern'?fmtE(e.amount):'—',505,y,9,'/F1',null,'r');
-    y-=rowH;
-  });
-  need(rowH);
-  ops.push('0.92 g 56 '+(y-rowH+6)+' 483.28 '+rowH+' re f');
-  txt('Summe',70,y,9,'/F2');
-  txt(fmtE(tsum.Material||0),310,y,9,'/F2',null,'r');
-  txt(fmtE(tsum.Arbeit||0),375,y,9,'/F2',null,'r');
-  txt(fmtE(tsum.Fahrt||0),440,y,9,'/F2',null,'r');
-  txt(fmtE(tsum.Steuern||0),505,y,9,'/F2',null,'r');
-  y-=rowH;
-  need(200);
-  ops.push('0.85 G 0.5 w 56 '+y+' m 539.28 '+y+' l S'); y-=18;
-  const total=entries.reduce((s,e)=>s+e.amount,0);
-  txt('Erfasste Ausgaben gesamt · Steuerjahr 2026',56,y,13,'/F2');
-  txt(fit(fmtE(total),120,13,'/F2'),539.28,y,13,'/F2',null,'r'); y-=28;
-  const cats={}; entries.forEach(e=>{ cats[e.category]=(cats[e.category]||0)+e.amount; });
-  txt('Nach Kategorie',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
-  Object.entries(cats).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
-  const props={}; entries.forEach(e=>{ const p=e.property.split(' · ')[0]; props[p]=(props[p]||0)+e.amount; });
-  txt('Nach Objekt',56,y,10,'/F2','0.42 0.44 0.48'); y-=16;
-  Object.entries(props).forEach(([k,v])=>{ need(16); txt('• '+k,60,y,9); txt(fit(fmtE(v),80,9),539.28,y,9,null,null,'r'); y-=16; });
-  need(30);
-  txt('Alle Beträge sind simulierte Beispieldaten.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
-  txt('Keine Steuerberatung: Ob und wie viel absetzbar ist, beurteilt deine Steuerberatung.',56,y,8,'/F1','0.42 0.44 0.48'); y-=12;
-  flush();
-  return buildPdfFile(pages);
-}
-function doExport(){
-  // PDF-Export ist immer kostenlos verfügbar (kein Paywall auf dem Ergebnis)
-  const pdf = makeTaxPdf(entries);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([pdfBytes(pdf)],{type:'application/pdf'}));
-  a.download = 'hostreceipts-steuer-2026-demo.pdf';
-  a.click();
-  bubble('bot','📤 <b>Export fertig!</b> Zusammenfassung als PDF angehängt (Demo-Wasserzeichen) – jederzeit kostenlos abrufbar.');
-  showTab('chat');
-}
-
-init();
-</script>
+<p class="fine">Early Access bedeutet: Das Produkt wird aktiv weiterentwickelt, Funktionen können sich ändern und einzelne Fehler sind möglich. Bitte sende im Test keine Unterlagen, die du nicht in einem frühen Produkt testen möchtest.</p>
+</div></section>
+</main>
+<footer><div class="wrap"><b>myZettelbox</b> · Belege per WhatsApp erfassen · Early Access 2026</div></footer>
 </body>
 </html>
