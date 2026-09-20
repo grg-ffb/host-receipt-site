@@ -1,67 +1,52 @@
 <!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="myZettelbox erfasst Rechnungen und Belege direkt über WhatsApp: Foto oder PDF senden, Daten prüfen, bestätigen und später als Übersicht exportieren. Early Access bis Ende 2026.">
-<title>myZettelbox – Belege einfach per WhatsApp erfassen</title>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="myZettelbox bringt Ordnung in deine Vermietungsbelege: Foto oder PDF per WhatsApp senden, kurz prüfen, bestätigen und später nach Jahr exportieren.">
+<title>myZettelbox – Belege per WhatsApp, ohne Zettelchaos</title>
 <style>
-:root{--ink:#17221d;--muted:#617068;--paper:#fbfaf6;--card:#fff;--green:#1f6f54;--green2:#e4f3eb;--line:#dfe7e2;--warm:#f2b66d}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--paper);color:var(--ink);line-height:1.55}
-.wrap{width:min(1080px,calc(100% - 40px));margin:auto}nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:22px;font-weight:850;letter-spacing:-.5px}.brand span{color:var(--green)}nav a{color:var(--ink);text-decoration:none;font-weight:700;font-size:14px}
-.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:70px;align-items:center;padding:72px 0 92px}.eyebrow{display:inline-block;background:var(--green2);color:var(--green);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800}h1{font-size:clamp(44px,6vw,72px);line-height:1.02;letter-spacing:-3px;margin:20px 0 22px;max-width:760px}.lead{font-size:20px;color:var(--muted);max-width:650px}.actions{display:flex;gap:12px;align-items:center;margin-top:32px;flex-wrap:wrap}.btn{display:inline-block;padding:14px 20px;border-radius:12px;background:var(--green);color:white;text-decoration:none;font-weight:800;border:1px solid var(--green)}.btn.secondary{background:transparent;color:var(--green)}.micro{font-size:13px;color:var(--muted);margin-top:14px}
-.phone{background:#e8e3da;border:9px solid #202622;border-radius:34px;padding:0 12px 18px;box-shadow:0 30px 70px #193c2b26;max-width:390px;margin:auto;overflow:hidden}.phonehead{background:var(--green);color:#fff;margin:0 -12px 14px;padding:17px 18px;font-weight:800}.bubble{background:#fff;padding:11px 13px;border-radius:12px;margin:9px 0;width:88%;font-size:14px;box-shadow:0 1px 2px #0001}.bubble.me{background:#d9f6cb;margin-left:auto}.receipt{font-size:13px}.ok{color:var(--green);font-weight:800}
-section{padding:84px 0}section.alt{background:#f1f5f1}.sectionhead{max-width:700px;margin-bottom:38px}.sectionhead h2{font-size:38px;letter-spacing:-1.5px;margin:0 0 10px}.sectionhead p{color:var(--muted);font-size:18px}.steps,.features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:25px}.num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--green2);color:var(--green);font-weight:900}.card h3{margin:16px 0 8px}.card p{color:var(--muted);margin:0}.early{background:var(--ink);color:white;border-radius:28px;padding:46px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center}.early h2{font-size:36px;letter-spacing:-1px;margin:0 0 10px}.early p{color:#cbd6d0;margin:0;max-width:650px}.early .btn{background:#fff;color:var(--ink);border-color:#fff}.fine{font-size:13px;color:var(--muted);max-width:800px;margin-top:24px}footer{padding:35px 0 55px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
-@media(max-width:800px){.hero{grid-template-columns:1fr;gap:45px;padding-top:45px}h1{letter-spacing:-2px}.steps,.features{grid-template-columns:1fr}.early{grid-template-columns:1fr;padding:30px}.phone{max-width:360px}section{padding:62px 0}}
-</style>
-</head>
-<body>
-<div class="wrap"><nav><div class="brand">my<span>Zettelbox</span></div><a href="#early">Early Access</a></nav></div>
+:root{--ink:#20332b;--green:#167456;--mint:#dff4e8;--cream:#fffaf0;--yellow:#ffd96a;--coral:#ff9078;--blue:#bfe5ef;--paper:#fff;--line:#dce8e1;--muted:#66756e}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.55 ui-rounded,"Avenir Next",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{width:min(1080px,calc(100% - 36px));margin:auto}
+nav{height:76px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:23px;font-weight:900;letter-spacing:-.7px}.brand b{color:var(--green)}nav .links{display:flex;gap:20px}a{color:inherit}.navlink{text-decoration:none;font-weight:800;font-size:14px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:55px;align-items:center;padding:65px 0 95px}.pill{display:inline-block;padding:8px 13px;border:2px solid var(--ink);border-radius:999px;background:var(--yellow);font-weight:900;font-size:13px;transform:rotate(-1deg)}h1{font-size:clamp(45px,6.5vw,76px);line-height:.98;letter-spacing:-3.5px;margin:22px 0}.scribble{position:relative;white-space:nowrap}.scribble:after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:8px;background:var(--coral);border-radius:50%;transform:rotate(-1deg);z-index:-1}.lead{font-size:20px;color:var(--muted);max-width:640px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.btn{display:inline-block;text-decoration:none;background:var(--green);color:#fff;font-weight:900;padding:14px 20px;border:2px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);transition:.15s}.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}.btn.alt{background:#fff;color:var(--ink)}
+.phonewrap{position:relative}.sticker{position:absolute;right:-15px;top:-25px;background:var(--yellow);border:2px solid var(--ink);border-radius:50%;width:95px;height:95px;display:grid;place-items:center;text-align:center;font-weight:900;transform:rotate(9deg);z-index:2}.phone{background:#e9e4dc;border:9px solid var(--ink);border-radius:35px;padding:0 13px 20px;box-shadow:13px 15px 0 #b7d8ca;max-width:390px;margin:auto;overflow:hidden}.phonehead{background:var(--green);color:#fff;margin:0 -13px 15px;padding:17px;font-weight:900}.bubble{background:#fff;padding:11px 13px;border-radius:12px;margin:9px 0;width:89%;font-size:14px;box-shadow:0 1px 2px #0001}.bubble.me{background:#d8f6c9;margin-left:auto}.ok{font-weight:900;color:var(--green)}
+section{padding:80px 0}.altbg{background:var(--mint);border-block:2px solid var(--ink)}.sectionhead{max-width:740px;margin-bottom:35px}.sectionhead h2{font-size:clamp(34px,4vw,46px);letter-spacing:-2px;line-height:1.05;margin:0 0 12px}.sectionhead p{font-size:18px;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card{background:#fff;border:2px solid var(--ink);border-radius:19px;padding:23px;box-shadow:5px 5px 0 #9bcab6}.stepicon{font-size:35px}.card h3{margin:12px 0 7px;font-size:19px}.card p{margin:0;color:var(--muted)}.wa{background:#fff;display:grid;grid-template-columns:.8fr 1.2fr;gap:35px;align-items:center;border:2px solid var(--ink);border-radius:25px;padding:35px;box-shadow:8px 8px 0 var(--yellow)}.wa h2{font-size:36px;line-height:1.05;margin:0 0 12px}.chatsteps{display:grid;gap:10px}.chatstep{background:var(--mint);border-radius:14px;padding:12px 15px;font-weight:750}.chatstep span{display:inline-grid;place-items:center;width:28px;height:28px;background:var(--green);color:#fff;border-radius:50%;margin-right:8px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.fine{font-size:13px;color:var(--muted);max-width:850px;margin-top:24px}.early{background:var(--ink);color:#fff;border-radius:27px;padding:42px;display:grid;grid-template-columns:1fr auto;gap:25px;align-items:center}.early h2{font-size:37px;line-height:1.05;margin:0 0 10px}.early p{color:#d7e1dc;margin:0}.early .btn{background:var(--yellow);color:var(--ink);border-color:#fff;box-shadow:4px 4px 0 #fff}
+footer{border-top:2px solid var(--ink);padding:35px 0 50px}.foot{display:flex;justify-content:space-between;gap:25px;flex-wrap:wrap}.foot a{margin-right:18px;font-weight:750}.legal{background:#fff;border-top:2px solid var(--ink)}.legal article{max-width:820px}.legal h2{font-size:32px}.legal h3{margin-top:28px}.legal p,.legal li{color:#46564f}.legal details{border:2px solid var(--ink);border-radius:15px;padding:0 20px;margin:12px 0;background:var(--cream)}.legal summary{cursor:pointer;font-weight:900;padding:17px 0}
+@media(max-width:850px){.hero,.wa{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.features{grid-template-columns:1fr}.early{grid-template-columns:1fr}.sticker{right:0}.phonewrap{margin-top:25px}}@media(max-width:560px){.steps{grid-template-columns:1fr}.navlink.hide{display:none}h1{letter-spacing:-2.5px}.wa{padding:24px}.early{padding:28px}}
+</style></head><body>
+<div class="wrap"><nav><div class="brand">📦 my<b>Zettelbox</b></div><div class="links"><a class="navlink hide" href="#so-gehts">So geht's</a><a class="navlink" href="#early">Early Access</a></div></nav></div>
 <main>
-<div class="wrap hero">
-<div>
-<span class="eyebrow">Early Access · kostenlos bis 31.12.2026</span>
-<h1>Belege rein.<br>Zettelchaos raus.</h1>
-<p class="lead">Schick Rechnungen und Belege einfach per WhatsApp an myZettelbox. Foto oder PDF genügt – die wichtigsten Daten werden erkannt, du prüfst sie kurz und bestätigst.</p>
-<div class="actions"><a class="btn" href="#early">Early Access anfragen</a><a class="btn secondary" href="#how">So funktioniert's</a></div>
-<p class="micro">Für Vermieter und Gastgeber im DACH-Raum · aktuell in früher Testphase</p>
-</div>
-<div class="phone" aria-label="Beispiel einer myZettelbox WhatsApp Unterhaltung">
-<div class="phonehead">🧾 myZettelbox</div>
-<div class="bubble me">📎 Rechnung_Stadtwerke.pdf</div>
-<div class="bubble receipt">🧾 <b>Beleg erkannt</b><br>Stadtwerke München<br>📅 12.09.2026<br>💰 84,20 EUR<br>🗂️ Strom, Gas &amp; Wasser</div>
-<div class="bubble me">✅ Bestätigen</div>
-<div class="bubble"><span class="ok">✓ Erfasst.</span> Der Beleg ist deiner Zettelbox zugeordnet.</div>
-</div>
-</div>
+<div class="wrap hero"><div><span class="pill">✨ Early Access · kostenlos bis 31.12.2026</span><h1>Deine Belege.<br>Eine <span class="scribble">Zettelbox</span>.<br>Direkt in WhatsApp.</h1><p class="lead">Kein neuer Login, keine neue App: Schick deinen Vermietungsbeleg als Foto oder PDF an myZettelbox. Wir lesen die wichtigsten Angaben aus – du prüfst und bestätigst.</p><div class="actions"><a class="btn" href="#early">Per WhatsApp starten</a><a class="btn alt" href="#so-gehts">Zeig mir wie</a></div></div>
+<div class="phonewrap"><div class="sticker">Kein<br>Zettel-<br>chaos 🎉</div><div class="phone"><div class="phonehead">🧾 myZettelbox</div><div class="bubble me">📎 Rechnung_Stadtwerke.pdf</div><div class="bubble">Gefunden! 🔎<br><b>Stadtwerke München</b><br>📅 12.09.2026 · 💰 84,20 €<br>🗂️ Strom, Gas &amp; Wasser</div><div class="bubble me">✏️ Korrigieren</div><div class="bubble">Was möchtest du ändern?</div><div class="bubble me">✅ Bestätigen</div><div class="bubble"><span class="ok">✓ Ab in die Zettelbox!</span></div></div></div></div>
 
-<section class="alt" id="how"><div class="wrap">
-<div class="sectionhead"><h2>In drei Schritten erledigt.</h2><p>Keine neue App, kein kompliziertes Formular. myZettelbox nutzt den Kanal, den du ohnehin auf dem Handy hast.</p></div>
-<div class="steps">
-<div class="card"><div class="num">1</div><h3>Beleg senden</h3><p>Fotografiere den Beleg oder sende eine PDF-Rechnung direkt über WhatsApp.</p></div>
-<div class="card"><div class="num">2</div><h3>Erkennung prüfen</h3><p>myZettelbox liest unter anderem Anbieter, Datum, Betrag und Kategorie aus. Fehler kannst du vor dem Speichern korrigieren.</p></div>
-<div class="card"><div class="num">3</div><h3>Bestätigen &amp; sammeln</h3><p>Bestätigte Ausgaben landen strukturiert in deiner Zettelbox. Zusammenfassung und CSV-Export helfen bei der späteren Aufbereitung.</p></div>
-</div>
-</div></section>
+<section class="altbg" id="so-gehts"><div class="wrap"><div class="sectionhead"><h2>WhatsApp auf. Beleg rein. Fertig. 🙌</h2><p>myZettelbox führt dich im Chat durch den Ablauf. Du brauchst nur WhatsApp und deinen Beleg.</p></div><div class="steps">
+<div class="card"><div class="stepicon">💬</div><h3>1. Chat starten</h3><p>Öffne myZettelbox in WhatsApp. Beim ersten Mal legst du dein Objekt an, z. B. „Ferienwohnung München“.</p></div>
+<div class="card"><div class="stepicon">📸</div><h3>2. Beleg schicken</h3><p>Fotografiere einen Papierbeleg oder hänge eine PDF-Rechnung direkt im Chat an.</p></div>
+<div class="card"><div class="stepicon">🪄</div><h3>3. Kurz prüfen</h3><p>Anbieter, Datum, Betrag und Kategorie werden vorgeschlagen. Passt etwas nicht, tippst du auf „Korrigieren“.</p></div>
+<div class="card"><div class="stepicon">📦</div><h3>4. Einsortieren</h3><p>Mit „Bestätigen“ landet die Ausgabe strukturiert in deiner Zettelbox – bereit für Übersicht und Export.</p></div>
+</div></div></section>
 
-<section><div class="wrap">
-<div class="sectionhead"><h2>Gebaut für den Alltag.</h2><p>Der Early Access konzentriert sich bewusst auf einen einfachen Kern: Belege schnell erfassen, statt sie bis zur Steuerzeit zu sammeln.</p></div>
-<div class="features">
-<div class="card"><h3>📷 Foto &amp; PDF</h3><p>Rechnungen aus Papier und digitale Dokumente können direkt verarbeitet werden.</p></div>
-<div class="card"><h3>✏️ Kontrolle bleibt bei dir</h3><p>Die automatische Erkennung ist eine Hilfe. Vor dem Erfassen kannst du Werte und Kategorie prüfen und korrigieren.</p></div>
-<div class="card"><h3>📊 Übersicht &amp; Export</h3><p>Bestätigte Belege lassen sich nach Steuerjahr zusammenfassen und als CSV exportieren.</p></div>
-</div>
-<p class="fine">myZettelbox befindet sich im Early Access und ist keine Steuerberatung. Die automatische Erkennung kann Fehler machen. Bitte prüfe die erfassten Angaben; die steuerliche Behandlung deiner Ausgaben solltest du bei Bedarf mit deiner Steuerberatung klären.</p>
-</div></section>
+<section><div class="wrap"><div class="wa"><div><div style="font-size:70px">📲</div><h2>Was kann ich myZettelbox schreiben?</h2><p>Du musst keine Befehle lernen. Buttons und Listen führen dich durch die wichtigsten Funktionen.</p></div><div class="chatsteps"><div class="chatstep"><span>1</span> „Hallo“ → myZettelbox startet die Einrichtung</div><div class="chatstep"><span>2</span> Objekt anlegen → deine Belege bekommen ein Zuhause</div><div class="chatstep"><span>3</span> Foto/PDF senden → Beleg wird erkannt</div><div class="chatstep"><span>4</span> Bestätigen oder korrigieren → du behältst die Kontrolle</div><div class="chatstep"><span>5</span> Übersicht wählen → Ausgaben nach Jahr ansehen &amp; CSV exportieren</div></div></div></div></section>
 
-<section id="early"><div class="wrap">
-<div class="early">
-<div><h2>Werde Early-Access-Tester.</h2><p>Wir suchen die ersten Gastgeber und Vermieter, die myZettelbox mit echten Belegen im Alltag testen und uns sagen, was noch fehlt. Die Nutzung im Early Access ist bis 31. Dezember 2026 kostenlos.</p></div>
-<a class="btn" href="https://wa.me/15556606913?text=Hallo%20myZettelbox%2C%20ich%20m%C3%B6chte%20am%20Early%20Access%20teilnehmen." target="_blank" rel="noopener">Early Access per WhatsApp</a>
-</div>
-<p class="fine">Early Access bedeutet: Das Produkt wird aktiv weiterentwickelt, Funktionen können sich ändern und einzelne Fehler sind möglich. Bitte sende im Test keine Unterlagen, die du nicht in einem frühen Produkt testen möchtest.</p>
-</div></section>
+<section class="altbg"><div class="wrap"><div class="sectionhead"><h2>Weniger Ablage. Mehr Überblick.</h2><p>Für private Vermieter und Gastgeber, die ihre Ausgaben nicht erst kurz vor der Steuer zusammensuchen wollen.</p></div><div class="features">
+<div class="card"><div class="stepicon">📷</div><h3>Foto &amp; PDF</h3><p>Papierbelege und digitale Rechnungen direkt aus WhatsApp verarbeiten.</p></div>
+<div class="card"><div class="stepicon">✏️</div><h3>Du entscheidest</h3><p>Automatische Erkennung hilft – gespeichert wird erst nach deiner Prüfung und Bestätigung.</p></div>
+<div class="card"><div class="stepicon">📊</div><h3>Jahresübersicht</h3><p>Bestätigte Ausgaben nach Jahr zusammenfassen und als CSV weitergeben.</p></div></div>
+<p class="fine">myZettelbox befindet sich im Early Access und ist keine Steuerberatung. Die automatische Erkennung kann Fehler machen. Bitte prüfe die erfassten Angaben; die steuerliche Behandlung deiner Ausgaben solltest du bei Bedarf mit deiner Steuerberatung klären.</p></div></section>
+
+<section id="early"><div class="wrap"><div class="early"><div><h2>Die ersten 100 Zettelboxen warten. 📦</h2><p>Teste myZettelbox mit deinen Vermietungsbelegen. Early Access ist bis 31. Dezember 2026 kostenlos. Das Produkt wird aktiv weiterentwickelt – dein Feedback fließt direkt ein.</p></div><a class="btn" href="https://wa.me/15556606913?text=Hallo%20myZettelbox%2C%20ich%20m%C3%B6chte%20am%20Early%20Access%20teilnehmen." target="_blank" rel="noopener">WhatsApp öffnen →</a></div><p class="fine">Early Access bedeutet: Funktionen können sich ändern und einzelne Fehler sind möglich. Bitte sende keine Unterlagen, die du nicht in einem frühen Produkt testen möchtest.</p></div></section>
+
+<section class="legal" id="rechtliches"><div class="wrap"><div class="sectionhead"><h2>Rechtliches</h2></div>
+<details id="impressum"><summary>Impressum</summary><article><p><b>Angaben gemäß § 5 DDG</b></p><p>Gerrit Grotewold<br>Ringelnatzweg 17<br>82256 Fürstenfeldbruck<br>Deutschland</p><p>E-Mail: <a href="mailto:grotewoldgerrit@gmail.com">grotewoldgerrit@gmail.com</a></p></article></details>
+<details id="datenschutz"><summary>Datenschutzerklärung – Early Access</summary><article>
+<h3>1. Verantwortlicher</h3><p>Gerrit Grotewold<br>Ringelnatzweg 17<br>82256 Fürstenfeldbruck<br>E-Mail: <a href="mailto:grotewoldgerrit@gmail.com">grotewoldgerrit@gmail.com</a></p>
+<h3>2. Zweck und verarbeitete Daten</h3><p>myZettelbox verarbeitet Belege, die du über WhatsApp sendest, um strukturierte Ausgabendaten zu extrahieren, dir zur Prüfung bereitzustellen und bestätigte Angaben nach Objekt und Jahr zusammenzufassen bzw. zu exportieren. Dabei können insbesondere WhatsApp-Kennung/Telefonnummer, Nachrichten- und Interaktionsdaten, Belegbilder/PDFs, extrahierte Belegdaten, Objektnamen, Kategorien, Korrekturen sowie technische Sicherheits- und Betriebsdaten verarbeitet werden.</p>
+<h3>3. Dienstleister</h3><p>Für den Early Access werden Meta / WhatsApp Business für die Nachrichtenübermittlung, OpenAI API für die strukturierte Belegauswertung und Microsoft Azure (North Europe / Irland) für Anwendung, PostgreSQL-Datenbank, Secret-Verwaltung und Datenbanksicherungen eingesetzt. Cloudflare wird für DNS und – soweit im finalen Produktionspfad eingesetzt – Netzwerk-/Edge-Dienste verwendet.</p>
+<h3>4. Speicherdauer</h3><p>myZettelbox speichert Belegbild-/PDF-Bytes nicht absichtlich dauerhaft im eigenen Anwendungsspeicher. Temporäre Parserdaten und Provider-Media-IDs werden nach Bestätigung oder Ablehnung entfernt; nicht abgeschlossene Belegvorgänge nach spätestens 7 Tagen. Bestätigte strukturierte Ausgabendaten bleiben bis zur Löschung durch dich bzw. bis zum Ende einer noch festzulegenden Account-Aufbewahrungsfrist gespeichert. Produktive PostgreSQL-Sicherungen werden derzeit 7 Tage aufbewahrt.</p>
+<h3>5. Deine Rechte</h3><p>Nach Maßgabe der gesetzlichen Voraussetzungen kannst du insbesondere Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenübertragbarkeit verlangen sowie ggf. Widerspruch einlegen. Datenschutzanfragen bitte an <a href="mailto:grotewoldgerrit@gmail.com">grotewoldgerrit@gmail.com</a>.</p>
+<h3>6. Beschwerde</h3><p>Für nicht-öffentliche Stellen mit Sitz in Bayern ist das Bayerische Landesamt für Datenschutzaufsicht (BayLDA) die zuständige Datenschutzaufsichtsbehörde.</p>
+<p class="fine"><b>Hinweis:</b> Diese Datenschutzerklärung ist für den Early Access vorbereitet. Die Rechtsgrundlagen, der account-spezifische Meta-Vertragsstatus sowie Details zu Drittlandtransfers werden vor breiter öffentlicher Freigabe abschließend geprüft.</p>
+</article></details></div></section>
 </main>
-<footer><div class="wrap"><b>myZettelbox</b> · Belege per WhatsApp erfassen · Early Access 2026</div></footer>
-</body>
-</html>
+<footer><div class="wrap foot"><div><b>📦 myZettelbox</b><br><span style="color:var(--muted)">Belege per WhatsApp erfassen · Early Access 2026</span></div><div><a href="#impressum">Impressum</a><a href="#datenschutz">Datenschutz</a><a href="mailto:grotewoldgerrit@gmail.com">Kontakt</a></div></div></footer>
+</body></html>
